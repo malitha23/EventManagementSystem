@@ -1,0 +1,580 @@
+﻿@model EventManagementSystem.Models.Event
+@{
+    Layout = "_Layout";
+    var availableTickets = ViewData["AvailableTickets"] as int? ?? 0;
+    var loyaltyPoints = ViewData["LoyaltyPoints"] as int? ?? 0;
+    var ticketPrice = ViewData["TicketPrice"] as decimal? ?? 0;
+    var discountPercentage = 0.1m; // 10% per 100 points
+}
+
+<link href="~/css/book-event.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="booking-container">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span>@TempData["ErrorMessage"]</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+
+    <!-- Progress Indicator -->
+    <div class="booking-progress mb-5">
+        <div class="progress-steps">
+            <div class="step active">
+                <div class="step-circle">1</div>
+                <div class="step-label">Event Details</div>
+            </div>
+            <div class="step-divider"></div>
+            <div class="step active">
+                <div class="step-circle">2</div>
+                <div class="step-label">Booking Details</div>
+            </div>
+            <div class="step-divider"></div>
+            <div class="step">
+                <div class="step-circle">3</div>
+                <div class="step-label">Confirmation</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Panel: Event Summary -->
+        <div class="col-lg-4">
+            <div class="sticky-sidebar">
+                <!-- Event Card -->
+                <div class="event-summary-card card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-gradient-primary text-white border-0 py-3">
+                        <h4 class="mb-0"><i class="bi bi-calendar2-event me-2"></i>Event Summary</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="event-image-placeholder mb-4 rounded-3 overflow-hidden bg-light">
+                            <div class="image-container position-relative">
+                                @if (!string.IsNullOrEmpty(Model.EventImages.First().ImageUrl))
+                                {
+                                    <img src="@Model.EventImages.First().ImageUrl" alt="@Model.Title" class="img-fluid w-100">
+                                }
+                                else
+                                {
+                                    <div class="no-image d-flex flex-column align-items-center justify-content-center py-5">
+                                        <i class="bi bi-calendar2-event text-muted display-4 mb-3"></i>
+                                        <span class="text-muted">Event Image</span>
+                                    </div>
+                                }
+                                <div class="event-badge position-absolute top-0 end-0 m-3">
+                                    <span class="badge bg-success px-3 py-2">
+                                        <i class="bi bi-ticket-perforated me-1"></i> @availableTickets Left
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="card-title mb-4">@Model.Title</h5>
+
+                        <div class="event-details">
+                            <div class="detail-item mb-3">
+                                <div class="detail-icon">
+                                    <i class="bi bi-calendar-check text-primary"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <small class="text-muted">Date & Time</small>
+                                    <div class="fw-medium">
+                                        @Model.EventDate.ToString("MMM dd, yyyy")
+                                        <span class="text-muted mx-1">•</span>
+                                        @Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="detail-item mb-3">
+                                <div class="detail-icon">
+                                    <i class="bi bi-geo-alt text-primary"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <small class="text-muted">Venue</small>
+                                    <div class="fw-medium">
+                                        @Model.Venue?.Name
+                                        <div class="text-muted small">@Model.Venue?.Location</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="detail-item mb-3">
+                                <div class="detail-icon">
+                                    <i class="bi bi-cash text-primary"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <small class="text-muted">Ticket Price</small>
+                                    <div class="fw-bold fs-5 text-success">Rs @ticketPrice.ToString("N2")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loyalty Points Card -->
+                <div class="loyalty-card card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="loyalty-icon">
+                                <i class="bi bi-award-fill text-warning"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Loyalty Points</h6>
+                                <small class="text-muted">Use points for discounts</small>
+                            </div>
+                        </div>
+                        
+                        <div class="points-display text-center mb-3 py-3 rounded-3 bg-light">
+                            <div class="points-value display-5 fw-bold text-warning mb-1">@loyaltyPoints</div>
+                            <div class="points-label text-muted">Available Points</div>
+                        </div>
+                        
+                        <div class="points-info bg-primary text-white rounded-3 p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-lightning-fill me-2"></i>
+                                <small class="fw-medium">Points Value</small>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>100 points =</span>
+                                <span class="fw-bold">Rs 10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Booking Form -->
+        <div class="col-lg-8">
+            <div class="booking-form-card card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h4 class="mb-0"><i class="bi bi-pencil-square me-2 text-primary"></i>Booking Details</h4>
+                </div>
+                
+                <div class="card-body p-4">
+                    @* <form id="bookingForm" asp-action="BookEvent" method="post" class="needs-validation" novalidate> *@
+                    <form id="bookingForm" method="post" class="needs-validation" novalidate>
+                        <input type="hidden" name="EventId" value="@Model.Id" />
+                        <input type="hidden" id="ticketPrice" value="@ticketPrice" />
+                        <input type="hidden" id="availableTicketsCount" value="@availableTickets" />
+
+                        <!-- Ticket Selection -->
+                        <div class="section mb-5">
+                            <div class="section-header mb-4">
+                                <h5 class="d-flex align-items-center">
+                                    <span class="section-number">1</span>
+                                    <span>Tickets Selection</span>
+                                </h5>
+                                <p class="text-muted mb-0">Choose number of tickets for this event</p>
+                            </div>
+                            
+                            <div class="ticket-selector">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div>
+                                        <label class="form-label fw-semibold">Number of Tickets</label>
+                                        <small class="text-muted d-block">Max @availableTickets tickets per order</small>
+                                    </div>
+                                    <div class="ticket-counter">
+                                        <button type="button" class="btn btn-outline-secondary btn-counter" 
+                                                onclick="changeTicketCount(-1)" id="decreaseTickets">
+                                            <i class="bi bi-dash-lg"></i>
+                                        </button>
+                                        <input type="number" class="form-control ticket-input" 
+                                               id="numberOfTickets" name="NumberOfTickets"
+                                               min="1" max="@availableTickets" value="1" required
+                                               oninput="calculateTotal()" />
+                                        <button type="button" class="btn btn-outline-secondary btn-counter" 
+                                                onclick="changeTicketCount(1)" id="increaseTickets">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="available-tickets alert alert-light d-flex align-items-center">
+                                    <i class="bi bi-info-circle text-primary me-2"></i>
+                                    <small><span id="remainingTickets">@availableTickets</span> tickets available</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Promo Code -->
+                        <div class="section mb-5">
+                            <div class="section-header mb-4">
+                                <h5 class="d-flex align-items-center">
+                                    <span class="section-number">2</span>
+                                    <span>Promo Code</span>
+                                </h5>
+                                <p class="text-muted mb-0">Apply discount code if available</p>
+                            </div>
+                            
+                            <div class="promo-section">
+                                <div class="input-group promo-input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-tag text-primary"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" 
+                                           id="promoCode" name="PromoCode"
+                                           placeholder="Enter promo code (e.g., EVENT10)">
+                                    <button type="button" class="btn btn-primary" id="applyPromoBtn">
+                                        Apply
+                                    </button>
+                                </div>
+                                <div id="promoMessage" class="mt-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- Loyalty Points -->
+                        <div class="section mb-5">
+                            <div class="section-header mb-4">
+                                <h5 class="d-flex align-items-center">
+                                    <span class="section-number">3</span>
+                                    <span>Loyalty Points</span>
+                                </h5>
+                                <p class="text-muted mb-0">Use your loyalty points for discounts</p>
+                            </div>
+                            
+                            <div class="loyalty-section">
+                                <div class="loyalty-controls mb-4">
+                                    <input type="range" class="form-range loyalty-slider d-none"
+                                           id="loyaltySlider"
+                                           min="0"
+                                           max="@(loyaltyPoints > 0 ? loyaltyPoints : 0)"
+                                           step="100"
+                                           value="0" />
+
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div class="points-input">
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" 
+                                                       id="loyaltyPoints" name="LoyaltyUsed" 
+                                                       min="0" max="@loyaltyPoints" value="0" />
+                                                <span class="input-group-text bg-light">points</span>
+                                            </div>
+                                        </div>
+                                        <div class="points-equivalent">
+                                            <span class="text-muted">=</span>
+                                            <span class="ms-2 fw-bold text-success" id="pointsValue">Rs 0.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="loyalty-info alert alert-light">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-lightning text-warning me-2"></i>
+                                        <div>
+                                            <small class="fw-medium" id="maxDiscount">Max discount: Rs 0.00</small>
+                                            <small class="d-block text-muted">Using <span id="currentPoints">0</span> points</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price Summary -->
+                        <div class="section mb-5">
+                            <div class="section-header mb-4">
+                                <h5 class="d-flex align-items-center">
+                                    <span class="section-number">4</span>
+                                    <span>Price Summary</span>
+                                </h5>
+                            </div>
+                            
+                            <div class="price-summary card border">
+                                <div class="card-body">
+                                    <div class="price-row d-flex justify-content-between mb-2">
+                                        <span>Tickets (<span id="ticketCount">1</span>x):</span>
+                                        <span>Rs <span id="ticketSubtotal">@ticketPrice.ToString("N2")</span></span>
+                                    </div>
+                                    
+                                    <div class="price-row d-flex justify-content-between mb-2">
+                                        <span>Promo Discount:</span>
+                                        <span class="text-success">- Rs <span id="promoDiscount">0.00</span></span>
+                                    </div>
+                                    
+                                    <div class="price-row d-flex justify-content-between mb-2">
+                                        <span>Loyalty Discount:</span>
+                                        <span class="text-success">- Rs <span id="loyaltyDiscount">0.00</span></span>
+                                    </div>
+                                    
+                                    <div class="price-total d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                        <div>
+                                            <h6 class="mb-0">Total Amount</h6>
+                                            <small class="text-muted">Inclusive of all charges</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="total-amount display-6 fw-bold text-primary">
+                                                Rs <span id="finalAmount">@ticketPrice.ToString("N2")</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" id="totalAmount" name="TotalAmount" value="@ticketPrice" />
+                            <input type="hidden" id="discountAmount" name="DiscountAmount" value="0" />
+                            <input type="hidden" id="finalAmountInput" name="FinalAmount" value="@ticketPrice" />
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-3">
+                            <button type="button" class="btn btn-primary btn-lg btn-checkout" id="checkoutBtn">
+                                <i class="bi bi-lock-fill me-2"></i>
+                                <span class="fw-semibold">Proceed to Secure Checkout</span>
+                            </button>
+                            
+                            <a href="@Url.Action("Dashboard", "Customer")"
+                               class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i> Back to Event Details
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="paymentModalLabel">Enter Payment Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="paymentForm">
+                                <div class="mb-3">
+                                    <label>Card Number</label>
+                                    <input type="text" class="form-control" id="cardNumber" placeholder="4111 1111 1111 1111" required />
+                                </div>
+                                <div class="mb-3">
+                                    <label>Expiry Date</label>
+                                    <input type="text" class="form-control" id="cardExpiry" placeholder="MM/YY" required />
+                                </div>
+                                <div class="mb-3">
+                                    <label>CVV</label>
+                                    <input type="text" class="form-control" id="cardCvv" placeholder="123" required />
+                                </div>
+                                <div class="mb-3">
+                                    <label>Card Holder Name</label>
+                                    <input type="text" class="form-control" id="cardHolder" placeholder="John Doe" required />
+                                </div>
+                            </form>
+                            <div id="paymentError" class="text-danger"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="payBtn">Pay Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <!-- Secure Payment Info -->
+            <div class="security-info mt-4 text-center">
+                <div class="d-flex justify-content-center gap-4 text-muted">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-shield-check text-success me-2"></i>
+                        <small>Secure Payment</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-clock-history text-primary me-2"></i>
+                        <small>Instant Confirmation</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-headset text-info me-2"></i>
+                        <small>24/7 Support</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get DOM elements
+    const ticketInput = document.getElementById('numberOfTickets');
+    const availableTickets = parseInt(document.getElementById('availableTicketsCount').value);
+    const ticketPrice = parseFloat(document.getElementById('ticketPrice').value);
+
+    const loyaltySlider = document.getElementById('loyaltySlider');
+    const loyaltyPointsInput = document.getElementById('loyaltyPoints');
+    const subtotalEl = document.getElementById('ticketSubtotal'); // fixed
+    const loyaltyDiscountEl = document.getElementById('loyaltyDiscount');
+    const finalAmountEl = document.getElementById('finalAmount');
+    const totalAmountInput = document.getElementById('totalAmount');
+    const discountAmountInput = document.getElementById('discountAmount');
+    const finalAmountInput = document.getElementById('finalAmountInput');
+    const promoDiscountEl = document.getElementById('promoDiscount');
+
+    let promoDiscount = 0; // Promo discount value
+
+    // Function to update prices
+        function calculateTotal() {
+        // Safely parse ticket input
+        let tickets = parseInt(ticketInput?.value) || 1;
+        let maxTickets = availableTickets || 0;
+
+        if (tickets > maxTickets) tickets = maxTickets;
+        if (tickets < 1) tickets = 1;
+        if (ticketInput) ticketInput.value = tickets;
+
+        // Calculate subtotal
+        let subtotal = tickets * (ticketPrice || 0);
+
+        // Loyalty discount: 100 points = Rs 10
+        let loyaltyUsed = parseInt(loyaltyPointsInput?.value) || 0;
+        let maxPoints = parseInt(loyaltySlider?.max) || 0;
+
+        if (loyaltyUsed > maxPoints) loyaltyUsed = maxPoints;
+        if (loyaltyUsed < 0) loyaltyUsed = 0;
+
+        if (loyaltyPointsInput) loyaltyPointsInput.value = loyaltyUsed;
+        if (loyaltySlider) loyaltySlider.value = loyaltyUsed;
+
+        let loyaltyDiscount = (loyaltyUsed / 100) * 10;
+
+        // Total after promo & loyalty discounts
+        let total = subtotal - (promoDiscount || 0) - loyaltyDiscount;
+        if (total < 0) total = 0;
+
+        // Update DOM safely
+        if (subtotalEl) subtotalEl.innerText = subtotal.toFixed(2);
+        if (loyaltyDiscountEl) loyaltyDiscountEl.innerText = loyaltyDiscount.toFixed(2);
+        if (promoDiscountEl) promoDiscountEl.innerText = (promoDiscount || 0).toFixed(2);
+        if (finalAmountEl) finalAmountEl.innerText = total.toFixed(2);
+
+        // Update hidden inputs
+        if (totalAmountInput) totalAmountInput.value = subtotal.toFixed(2);
+        if (discountAmountInput) discountAmountInput.value = (loyaltyDiscount + (promoDiscount || 0)).toFixed(2);
+        if (finalAmountInput) finalAmountInput.value = total.toFixed(2);
+
+        // Update loyalty points display
+        const pointsValueEl = document.getElementById('pointsValue');
+        const currentPointsEl = document.getElementById('currentPoints');
+        if (pointsValueEl) pointsValueEl.innerText = "Rs " + loyaltyDiscount.toFixed(2);
+        if (currentPointsEl) currentPointsEl.innerText = loyaltyUsed;
+
+        // Update max discount display
+        const maxDiscountEl = document.getElementById('maxDiscount');
+        const maxDiscount = (maxPoints / 100) * 10;
+        if (maxDiscountEl) maxDiscountEl.innerText = "Max discount: Rs " + maxDiscount.toFixed(2);
+
+        // Update ticket count display in summary
+        const ticketCountEl = document.getElementById('ticketCount');
+        if (ticketCountEl) ticketCountEl.innerText = tickets;
+    }
+
+
+    // Change ticket count with buttons
+    function changeTicketCount(amount) {
+        ticketInput.value = parseInt(ticketInput.value) + amount;
+        calculateTotal();
+    }
+
+    // Sync slider with input
+    loyaltySlider.addEventListener('input', () => {
+        loyaltyPointsInput.value = loyaltySlider.value;
+        calculateTotal();
+    });
+
+    loyaltyPointsInput.addEventListener('input', () => {
+        let val = parseInt(loyaltyPointsInput.value);
+        if (val < 0) val = 0;
+        if (val > parseInt(loyaltySlider.max)) val = parseInt(loyaltySlider.max);
+        loyaltyPointsInput.value = val;
+        loyaltySlider.value = val;
+        calculateTotal();
+    });
+
+       document.getElementById('applyPromoBtn').addEventListener('click', async () => {
+        const promoCode = document.getElementById('promoCode').value.trim();
+        const tickets = parseInt(document.getElementById('numberOfTickets').value) || 1;
+        const messageEl = document.getElementById('promoMessage');
+
+        if (!promoCode) {
+            messageEl.innerHTML = '<span class="text-danger">Please enter a promo code.</span>';
+            return;
+        }
+
+        try {
+                const totalPrice = parseFloat(document.getElementById('totalAmount').value);
+
+    fetch('/Booking/ApplyPromoCode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode, totalPrice: totalPrice })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const promoMessageEl = document.getElementById('promoMessage');
+        if (data.success) {
+            promoDiscount = parseFloat(data.discount);
+            promoMessageEl.innerHTML = `<span class="text-success">${data.message}</span>`;
+        } else {
+            promoDiscount = 0;
+            promoMessageEl.innerHTML = `<span class="text-danger">${data.message}</span>`;
+        }
+        calculateTotal(); // recalculate totals
+    });
+
+        } catch (error) {
+            console.error(error);
+            messageEl.innerHTML = '<span class="text-danger">Error applying promo code.</span>';
+            promoDiscount = 0;
+            calculateTotal();
+        }
+    });
+
+        document.getElementById('checkoutBtn').addEventListener('click', function () {
+        // Open modal
+        var modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+        modal.show();
+    });
+
+      document.getElementById('payBtn').addEventListener('click', function () {
+        var button = this;
+        var number = document.getElementById('cardNumber').value.trim();
+        var expiry = document.getElementById('cardExpiry').value.trim();
+        var cvv = document.getElementById('cardCvv').value.trim();
+        var holder = document.getElementById('cardHolder').value.trim();
+        var errorDiv = document.getElementById('paymentError');
+
+        // Clear previous errors
+        errorDiv.textContent = "";
+
+        // Basic validation
+        if (!number || !expiry || !cvv || !holder) {
+            errorDiv.textContent = "Please fill all card details!";
+            return;
+        }
+
+        // Disable pay button and show loading
+        button.disabled = true;
+        button.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...`;
+
+        // Simulate payment success (replace with real payment gateway)
+        setTimeout(function () {
+            // Payment success
+            errorDiv.textContent = "";
+
+            // Optionally close modal if using bootstrap modal
+            var modalEl = document.getElementById('paymentModal');
+            var modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+
+            // Submit original booking form
+            document.getElementById('bookingForm').submit();
+        }, 1500); // simulate delay
+    });
+
+
+
+
+    // Initialize totals
+    calculateTotal();
+</script>

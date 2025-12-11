@@ -1,0 +1,649 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+<link href="~/css/customer-home.css" rel="stylesheet" />
+@model List<EventManagementSystem.Models.Event>
+@{
+    Layout = "_Layout";
+    var userName = ViewBag.UserName ?? "Customer";
+    var searchQuery = ViewContext.HttpContext.Request.Query["search"].ToString();
+    var categoryQuery = ViewContext.HttpContext.Request.Query["category"].ToString();
+    var locationQuery = ViewContext.HttpContext.Request.Query["location"].ToString();
+    var minPriceQuery = ViewContext.HttpContext.Request.Query["minPrice"].ToString();
+    var maxPriceQuery = ViewContext.HttpContext.Request.Query["maxPrice"].ToString();
+    var sortQuery = ViewContext.HttpContext.Request.Query["sort"].ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="text-white fw-bold mb-3">Discover Amazing Events</h1>
+                <p class="text-white-80 lead mb-4">Find and book tickets to concerts, conferences, exhibitions, and more</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="bg-white rounded-3 p-3 shadow-sm d-inline-block">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-user-circle fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">Welcome, @userName!</h6>
+                            <small class="text-muted">Customer Dashboard</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 mb-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title fw-bold mb-0">
+                            <i class="fas fa-filter me-2"></i>Filter Events
+                        </h5>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="clearFiltersBtn">
+                            <i class="fas fa-times me-1"></i>Clear
+                        </button>
+                    </div>
+
+                    <form method="get" asp-action="Dashboard" id="filterForm" class="mb-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Search</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control border-start-0"
+                                       placeholder="Event name, location..." value="@searchQuery">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Category</label>
+                            <select name="category" class="form-select">
+                                <option value="all">All Categories</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    foreach (var cat in ViewBag.Categories)
+                                    {
+                                        <option value="@cat.Name" selected="@(categoryQuery == cat.Name ? "selected" : null)">
+                                            @cat.Name
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Location</label>
+                            <select name="location" class="form-select">
+                                <option value="all">All Locations</option>
+                                @if (ViewBag.Venues != null)
+                                {
+                                    foreach (var v in ViewBag.Venues)
+                                    {
+                                        <option value="@v.Location" selected="@(locationQuery == v.Location ? "selected" : null)">
+                                            @v.Location
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Price Range (Rs)</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="number" name="minPrice" class="form-control"
+                                           placeholder="Min" value="@minPriceQuery" min="0">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" name="maxPrice" class="form-control"
+                                           placeholder="Max" value="@maxPriceQuery" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Sort By</label>
+                            <select name="sort" class="form-select">
+                                <option value="date_asc" selected="@(sortQuery == "date_asc" || string.IsNullOrEmpty(sortQuery) ? "selected" : null)">Date (Soonest)</option>
+                                <option value="date_desc" selected="@(sortQuery == "date_desc" ? "selected" : null)">Date (Latest)</option>
+                                <option value="price_asc" selected="@(sortQuery == "price_asc" ? "selected" : null)">Price (Low to High)</option>
+                                <option value="price_desc" selected="@(sortQuery == "price_desc" ? "selected" : null)">Price (High to Low)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill mb-2">
+                            <i class="fas fa-filter me-2"></i>Apply Filters
+                        </button>
+
+                        <button type="button" class="btn btn-outline-secondary w-100 rounded-pill" id="resetFiltersBtn">
+                            <i class="fas fa-redo me-2"></i>Reset All
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events Grid -->
+        <div class="col-lg-9">
+            <!-- Events Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-0">Upcoming Events</h4>
+                    <p class="text-muted mb-0" id="eventsCount">
+                        @if (ViewBag.EventsCount > 0)
+                        {
+                            <span>Showing @ViewBag.EventsCount @((int)ViewBag.EventsCount == 1 ? "event" : "events")</span>
+                            @if (!string.IsNullOrEmpty(searchQuery) || categoryQuery != "all" || locationQuery != "all" || !string.IsNullOrEmpty(minPriceQuery) || !string.IsNullOrEmpty(maxPriceQuery))
+                            {
+                                <span class="text-primary">(filtered)</span>
+                            }
+                        }
+                        else
+                        {
+                            <span>No events found</span>
+                        }
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" id="refreshEvents">
+                        <i class="fas fa-redo me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading Spinner (Initial) -->
+            <div id="loadingContainer" style="display: none;">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading events...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Loading events...</p>
+                </div>
+            </div>
+
+            <!-- Events Grid -->
+            <div id="eventsContainer">
+                @if (Model != null && Model.Count > 0)
+                {
+                    <div class="row" id="eventsGrid">
+                        @foreach (var ev in Model)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card event-card border-0 shadow-sm h-100" data-event-id="@ev.Id">
+                                    <div class="position-relative">
+                                        <img src="@((ev.EventImages != null && ev.EventImages.Count > 0)
+                                             ? ev.EventImages.First().ImageUrl
+                                             : "/images/default-event.jpg")"
+                                             class="card-img-top" alt="@ev.Title" style="height: 200px; object-fit: cover;">
+                                        <div class="date-badge">
+                                            <span class="date-day">@ev.EventDate.Day</span>
+                                            <span class="date-month">@ev.EventDate.ToString("MMM").ToUpper()</span>
+                                        </div>
+                                        <div class="event-badge">
+                                            Rs @ev.TicketPrice.ToString("N0")
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <span class="badge bg-primary mb-2">@ev.Category?.Name?.ToUpper()</span>
+                                        <h5 class="card-title fw-bold">@ev.Title</h5>
+                                        <p class="card-text text-muted small">@(ev.Description?.Length > 100 ? ev.Description.Substring(0, 100) + "..." : ev.Description)</p>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div>
+                                                <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                                <small class="text-muted">@ev.Venue?.Location</small>
+                                            </div>
+                                            <div>
+                                                <i class="fas fa-clock text-primary me-1"></i>
+                                                <small class="text-muted">@ev.StartTime.ToString(@"hh\:mm")</small>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <span class="badge bg-light text-dark me-2">
+                                                @{
+                                                    var bookedTickets = ev.Bookings?
+                                                    .Where(b => b.BookingStatus == "confirmed")
+                                                    .Sum(b => b.NumberOfTickets) ?? 0;
+
+                                                    var availableTickets = ev.TotalCapacity - bookedTickets;
+                                                }
+
+
+                                                <p>
+                                                    <i class="fas fa-users me-1"></i> @availableTickets available
+                                                </p>
+
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-top-0">
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-outline-primary rounded-pill view-details-btn"
+                                                    data-event-id="@ev.Id">
+                                                <i class="fas fa-eye me-2"></i>View Details
+                                            </button>
+                                            <a href="@Url.Action("BookEvent", "Booking", new { id = ev.Id })"
+                                               class="btn btn-primary rounded-pill book-now-btn">
+                                                <i class="fas fa-ticket-alt me-2"></i>Book Now
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5" id="noEvents">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h5 class="fw-bold">No events found</h5>
+                        <p class="text-muted mb-3">Try adjusting your filters or check back later</p>
+                        @if (!string.IsNullOrEmpty(searchQuery) || categoryQuery != "all" || locationQuery != "all" || !string.IsNullOrEmpty(minPriceQuery) || !string.IsNullOrEmpty(maxPriceQuery))
+                        {
+                            <button class="btn btn-primary rounded-pill" id="clearAndReloadBtn">
+                                <i class="fas fa-undo me-2"></i>Clear Filters & Reload
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Details Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="modalEventTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div id="modalCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner" id="modalCarouselInner">
+                                <!-- Images loaded dynamically -->
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#modalCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#modalCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary mb-3">Event Details</h6>
+                            <div class="mb-2">
+                                <i class="fas fa-calendar text-primary me-2"></i>
+                                <span id="modalEventDate"></span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="fas fa-clock text-primary me-2"></i>
+                                <span id="modalEventTime"></span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                <span id="modalEventLocation"></span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="fas fa-users text-primary me-2"></i>
+                                <span id="modalEventCapacity"></span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="fas fa-tag text-primary me-2"></i>
+                                <span id="modalEventCategory"></span>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary mb-3">Ticket Information</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Price per ticket:</span>
+                                <span class="fw-bold" id="modalTicketPrice"></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>Available tickets:</span>
+                                <span class="fw-bold" id="modalAvailableTickets"></span>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary mb-3">Description</h6>
+                            <p id="modalEventDescription" class="text-muted"></p>
+                        </div>
+                        <div class="d-grid">
+                            <a href="#" class="btn btn-primary rounded-pill py-2" id="modalBookNowBtn">
+                                <i class="fas fa-ticket-alt me-2"></i>Book This Event
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" style="display: none;">
+    <div class="spinner-container">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Loading event details...</p>
+    </div>
+</div>
+
+<!-- CSS Styles -->
+<style>
+    .page-header {
+        position: relative;
+        overflow: hidden;
+    }
+
+        .page-header:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,202.7C672,203,768,181,864,165.3C960,149,1056,139,1152,149.3C1248,160,1344,192,1392,208L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-position: bottom;
+        }
+
+    .event-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+        }
+
+    .card-img-top {
+        transition: transform 0.5s ease;
+    }
+
+    .event-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+
+    .date-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .date-day {
+        display: block;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #0d6efd;
+    }
+
+    .date-month {
+        display: block;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .event-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(13, 110, 253, 0.9);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .spinner-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .carousel-item img {
+        height: 400px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show loading state during filter submission
+            const filterForm = document.getElementById('filterForm');
+            const eventsContainer = document.getElementById('eventsContainer');
+            const loadingContainer = document.getElementById('loadingContainer');
+
+            filterForm.addEventListener('submit', function(e) {
+                loadingContainer.style.display = 'block';
+                eventsContainer.style.display = 'none';
+            });
+
+            // Clear individual filters button
+            document.getElementById('clearFiltersBtn').addEventListener('click', function() {
+                document.querySelectorAll('#filterForm input, #filterForm select').forEach(element => {
+                    if (element.tagName === 'INPUT') {
+                        element.value = '';
+                    } else if (element.tagName === 'SELECT') {
+                        element.value = element.options[0].value;
+                    }
+                });
+
+                // Submit form to reload with cleared filters
+                filterForm.submit();
+            });
+
+            // Reset all filters and reload
+            document.getElementById('resetFiltersBtn').addEventListener('click', function() {
+                window.location.href = '@Url.Action("Dashboard", "Customer")';
+            });
+
+            // Clear filters and reload button in no events state
+            const clearAndReloadBtn = document.getElementById('clearAndReloadBtn');
+            if (clearAndReloadBtn) {
+                clearAndReloadBtn.addEventListener('click', function() {
+                    window.location.href = '@Url.Action("Dashboard", "Customer")';
+                });
+            }
+
+            // Refresh events button
+            document.getElementById('refreshEvents').addEventListener('click', function() {
+                loadingContainer.style.display = 'block';
+                eventsContainer.style.display = 'none';
+                filterForm.submit();
+            });
+
+            // View details button functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.view-details-btn')) {
+                    const eventId = e.target.closest('.view-details-btn').getAttribute('data-event-id');
+                    showEventDetails(eventId);
+                }
+            });
+
+            // Function to show event details in modal
+            async function showEventDetails(eventId) {
+                // Show loading overlay
+                document.querySelector('.loading-overlay').style.display = 'flex';
+
+                try {
+                    // Fetch event details (simulated - in real app, make API call)
+                    const event = await getEventDetails(eventId);
+
+                    if (event) {
+                        // Populate modal
+                        document.getElementById('modalEventTitle').textContent = event.title;
+                        document.getElementById('modalEventDate').textContent =
+                            new Date(event.eventDate).toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+                        document.getElementById('modalEventTime').textContent = event.startTime;
+                        document.getElementById('modalEventLocation').textContent = event.location;
+                        document.getElementById('modalEventCapacity').textContent =
+                            `${event.availableTickets} of ${event.totalCapacity} tickets available`;
+                        document.getElementById('modalEventCategory').textContent = event.category;
+                        document.getElementById('modalTicketPrice').textContent = `Rs ${event.ticketPrice}`;
+                        document.getElementById('modalAvailableTickets').textContent = event.availableTickets;
+                        document.getElementById('modalEventDescription').textContent = event.description;
+
+                        // Set book now button href
+                        document.getElementById('modalBookNowBtn').href =
+                            '@Url.Action("BookEvent", "Booking")' + '?id=' + eventId;
+
+                        // Setup carousel
+                        const carouselInner = document.getElementById('modalCarouselInner');
+                        carouselInner.innerHTML = '';
+
+                        if (event.images && event.images.length > 0) {
+                            event.images.forEach((img, index) => {
+                                const item = document.createElement('div');
+                                item.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+                                item.innerHTML = `
+                                    <img src="${img}" class="d-block w-100" alt="Event image ${index + 1}">
+                                `;
+                                carouselInner.appendChild(item);
+                            });
+                        } else {
+                            carouselInner.innerHTML = `
+                                <div class="carousel-item active">
+                                    <img src="/images/default-event.jpg" class="d-block w-100" alt="Default event image">
+                                </div>
+                            `;
+                        }
+
+                        // Show modal
+                        const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                        modal.show();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Event details could not be loaded. Please try again.'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading event details:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to load event details. Please try again.'
+                    });
+                } finally {
+                    // Hide loading overlay
+                    document.querySelector('.loading-overlay').style.display = 'none';
+                }
+            }
+
+            // Simulated API call for event details
+            async function getEventDetails(eventId) {
+                // In a real application, you would make an API call here
+                // For now, we'll simulate with a timeout and find the event from the page data
+
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        // Find event in the current page data
+                        const eventCard = document.querySelector(`[data-event-id="${eventId}"]`);
+                        if (eventCard) {
+                            const event = {
+                                id: eventId,
+                                title: eventCard.querySelector('.card-title').textContent,
+                                eventDate: eventCard.querySelector('.date-day').textContent +
+                                          ' ' + eventCard.querySelector('.date-month').textContent +
+                                          ' ' + new Date().getFullYear(),
+                                startTime: eventCard.querySelector('.fa-clock').parentElement.querySelector('small').textContent,
+                                location: eventCard.querySelector('.fa-map-marker-alt').parentElement.querySelector('small').textContent,
+                                category: eventCard.querySelector('.badge.bg-primary').textContent,
+                                ticketPrice: eventCard.querySelector('.event-badge').textContent.replace('Rs ', ''),
+                                totalCapacity: 100, // This would come from the database
+                                availableTickets: parseInt(eventCard.querySelector('.fa-users').parentElement.textContent.match(/\d+/)[0]),
+                                description: eventCard.querySelector('.card-text').textContent,
+                                images: [eventCard.querySelector('img').src]
+                            };
+                            resolve(event);
+                        } else {
+                            resolve(null);
+                        }
+                    }, 500); // Simulate network delay
+                });
+            }
+
+            // Modal carousel initialization
+            document.getElementById('eventModal').addEventListener('shown.bs.modal', function() {
+                const carousel = new bootstrap.Carousel(document.getElementById('modalCarousel'));
+            });
+
+            // Show active filters
+            function showActiveFilters() {
+                const activeFilters = [];
+                if ('@searchQuery') activeFilters.push(`Search: "@searchQuery"`);
+                if ('@categoryQuery' && '@categoryQuery' !== 'all') activeFilters.push(`Category: @categoryQuery`);
+                if ('@locationQuery' && '@locationQuery' !== 'all') activeFilters.push(`Location: @locationQuery`);
+                if ('@minPriceQuery') activeFilters.push(`Min Price: Rs @minPriceQuery`);
+                if ('@maxPriceQuery') activeFilters.push(`Max Price: Rs @maxPriceQuery`);
+
+                if (activeFilters.length > 0) {
+                    const filterBadge = document.createElement('div');
+                    filterBadge.className = 'alert alert-info mt-3';
+                    filterBadge.innerHTML = `
+                        <strong>Active Filters:</strong><br>
+                        ${activeFilters.join('<br>')}
+                        <button type="button" class="btn btn-sm btn-outline-info ms-2" onclick="window.location.href='@Url.Action("Dashboard", "Customer")'">
+                            Clear All
+                        </button>
+                    `;
+
+                    const eventsHeader = document.querySelector('.col-lg-9 > .d-flex');
+                    eventsHeader.parentNode.insertBefore(filterBadge, eventsHeader.nextSibling);
+                }
+            }
+
+            // Initialize
+            showActiveFilters();
+        });
+    </script>
+}

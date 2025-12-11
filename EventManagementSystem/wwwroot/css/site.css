@@ -1,0 +1,68 @@
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Navbar */
+.navbar {
+    background: red;
+    padding: 1rem 2rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 1.6rem;
+}
+
+.navbar-nav .nav-link {
+    color: #fff !important;
+    margin-right: 1rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+    .navbar-nav .nav-link:hover {
+        color: #ffd700 !important;
+    }
+
+.btn-outline-light {
+    border-color: #fff;
+    color: #fff;
+    transition: all 0.3s;
+}
+
+    .btn-outline-light:hover {
+        background-color: #fff;
+        color: #0072ff;
+    }
+
+.btn-primary-custom {
+    background: #ffd700;
+    border: none;
+    color: #000;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+    .btn-primary-custom:hover {
+        background: #e6c200;
+    }
+
+.dropdown-menu {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.dropdown-item:hover {
+    background-color: #f1f1f1;
+}
+
+/* Toggler */
+.navbar-toggler {
+    border: none;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' fill='white' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}

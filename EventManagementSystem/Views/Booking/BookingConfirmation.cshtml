@@ -1,0 +1,37 @@
+﻿@model EventManagementSystem.Models.Booking
+
+<div class="container py-5">
+    <div class="text-center">
+        <div class="mb-4">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+        </div>
+        <h2 class="fw-bold mb-3">Booking Confirmed!</h2>
+        <p class="lead mb-4">Your tickets have been booked successfully.</p>
+
+        <div class="card mx-auto mb-4" style="max-width: 500px;">
+            <div class="card-body">
+                <h5 class="card-title">Booking Details</h5>
+                <div class="text-start">
+                    <p><strong>Booking ID:</strong> #@Model.Id</p>
+                    <p><strong>Event:</strong> @Model.Event?.Title</p>
+                    <p><strong>Date:</strong> @Model.Event?.EventDate.ToString("dd MMM yyyy")</p>
+                    <p><strong>Tickets:</strong> @Model.NumberOfTickets</p>
+                    <p><strong>Total Paid:</strong> Rs @Model.FinalAmount.ToString("N2")</p>
+                    <p><strong>Loyalty Points Earned:</strong> @Model.LoyaltyEarned</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3">
+            <a href="@Url.Action("MyBookings")" class="btn btn-primary">
+                View My Bookings
+            </a>
+            <a href="@Url.Action("Index", "Event")" class="btn btn-outline-primary">
+                Find More Events
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary">
+                <i class="bi bi-printer"></i> Print
+            </button>
+        </div>
+    </div>
+</div>

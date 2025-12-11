@@ -1,0 +1,270 @@
+﻿.booking-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Progress Steps */
+.booking-progress {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.progress-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #6c757d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.step.active .step-circle {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.step-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.step.active .step-label {
+    color: #333;
+    font-weight: 600;
+}
+
+.step-divider {
+    width: 60px;
+    height: 2px;
+    background: #e9ecef;
+    margin-top: 20px;
+}
+
+/* Sticky Sidebar */
+.sticky-sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+/* Cards */
+.event-summary-card, .booking-form-card, .loyalty-card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+    .event-summary-card .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+.loyalty-card {
+    background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+}
+
+.event-image-placeholder {
+    height: 200px;
+    background: linear-gradient(45deg, #f8f9fa 25%, #e9ecef 25%, #e9ecef 50%, #f8f9fa 50%, #f8f9fa 75%, #e9ecef 75%);
+    background-size: 20px 20px;
+}
+
+/* Detail Items */
+.detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.detail-icon {
+    width: 36px;
+    height: 36px;
+    background: #f0f2ff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.detail-content {
+    flex: 1;
+}
+
+/* Loyalty Display */
+.loyalty-icon {
+    width: 48px;
+    height: 48px;
+    background: #fff9e6;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.points-display {
+    background: linear-gradient(135deg, #fdfcfb 0%, #f5f1ed 100%);
+    border: 2px dashed #ffc107;
+}
+
+/* Sections */
+.section {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid #e9ecef;
+}
+
+.section-header {
+    position: relative;
+}
+
+.section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #667eea;
+    color: white;
+    border-radius: 8px;
+    margin-right: 1rem;
+    font-size: 0.875rem;
+    font-weight: bold;
+}
+
+/* Ticket Counter */
+.ticket-counter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-counter {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    border: 2px solid #dee2e6;
+}
+
+.ticket-input {
+    width: 80px;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+}
+
+/* Promo Code Input */
+.promo-input-group {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    .promo-input-group .form-control {
+        padding: 1rem;
+        border: none;
+    }
+
+    .promo-input-group .btn {
+        padding: 1rem 2rem;
+        border: none;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+/* Loyalty Slider */
+.loyalty-slider {
+    height: 8px;
+    border-radius: 4px;
+    background: #e9ecef;
+}
+
+    .loyalty-slider::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+        background: #ffc107;
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+/* Price Summary */
+.price-summary {
+    background: #f8f9ff;
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.price-row {
+    font-size: 1rem;
+    color: #495057;
+}
+
+.price-total {
+    background: linear-gradient(135deg, #f8f9ff 0%, #eef1ff 100%);
+    margin: 0 -1.5rem;
+    padding: 1.5rem;
+}
+
+.total-amount {
+    color: #667eea;
+}
+
+/* Checkout Button */
+.btn-checkout {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 1.25rem;
+    border-radius: 12px;
+    font-size: 1.125rem;
+    transition: all 0.3s ease;
+}
+
+    .btn-checkout:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .booking-container {
+        padding: 1rem;
+    }
+
+    .progress-steps {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .step-divider {
+        width: 2px;
+        height: 20px;
+        margin-left: 19px;
+    }
+
+    .btn-checkout {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+}

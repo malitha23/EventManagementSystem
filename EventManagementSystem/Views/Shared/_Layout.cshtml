@@ -1,0 +1,259 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Event Management System</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <!-- Layout Styles -->
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calendar-alt"></i>
+                EventFlow
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    @{
+                        var isAuthenticated = HttpContextAccessor.HttpContext?.Session.GetInt32("UserId") != null;
+                        var userName = HttpContextAccessor.HttpContext?.Session.GetString("UserName");
+                        var userRole = HttpContextAccessor.HttpContext?.Session.GetString("UserRole");
+                    }
+
+                    <!-- Home link always visible -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i> Home
+                        </a>
+                    </li>
+
+                    <!-- Events link -->
+                    @if (isAuthenticated && userRole?.ToLower() == "customer")
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Events">
+                                <i class="fas fa-calendar me-1"></i> Events
+                            </a>
+                        </li>
+                    }
+
+                    @if (!isAuthenticated)
+                    {
+                        <li class="nav-item me-2">
+                            <a class="btn btn-outline-light btn-sm rounded-pill px-3" href="/Account/Login">
+                                <i class="fas fa-sign-in-alt me-1"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary-custom btn-sm rounded-pill px-3" href="/Account/Register">
+                                <i class="fas fa-user-plus me-1"></i> Register
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle fw-bold d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-2"></i>
+                                <span>@userName</span>
+                                <span class="badge bg-warning text-dark ms-2">@userRole</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                @if (userRole?.ToLower() == "customer")
+                                {
+                                    <li>
+                                        <a class="dropdown-item" href="/Customer/Dashboard">
+                                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/Customer/Bookings">
+                                            <i class="fas fa-ticket-alt me-2"></i> My Bookings
+                                        </a>
+                                    </li>
+                                }
+                                else if (userRole?.ToLower() == "organizer")
+                                {
+                                    <li>
+                                        <a class="dropdown-item" href="/Organizer/Dashboard">
+                                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/Organizer/Events">
+                                            <i class="fas fa-calendar me-2"></i> My Events
+                                        </a>
+                                    </li>
+                                }
+                                else if (userRole?.ToLower() == "admin")
+                                {
+                                    <li>
+                                        <a class="dropdown-item" href="/Admin/Dashboard">
+                                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/Admin/Users">
+                                            <i class="fas fa-users me-2"></i> Manage Users
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/Admin/Events">
+                                            <i class="fas fa-calendar-check me-2"></i> Manage Events
+                                        </a>
+                                    </li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="/Account/Profile">
+                                        <i class="fas fa-user-edit me-2"></i> Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <form asp-action="Logout" asp-controller="Account" method="post" >
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                        </button>
+                                    </form>
+                                </li>
+
+                            </ul>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        @RenderBody()
+    </main>
+
+    <!-- Optional Footer -->
+    <footer class="footer mt-auto">
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5><i class="fas fa-calendar-alt"></i> EventFlow</h5>
+                    <p class="mb-0">Your premier event management solution</p>
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5>Quick Links</h5>
+                    <a href="/" class="text-white d-block">Home</a>
+                    @if (isAuthenticated)
+                    {
+                        <a href="/Events" class="text-white d-block">Events</a>
+                    }
+                    <a href="/Account/Login" class="text-white d-block">Login</a>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact</h5>
+                    <p class="mb-0">
+                        <i class="fas fa-envelope me-2"></i> support@eventflow.com<br>
+                        <i class="fas fa-phone me-2"></i> +1 (555) 123-4567
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4 bg-white">
+            <p class="mb-0">&copy; 2023 EventFlow. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Layout Scripts -->
+    <script>
+        // Loading spinner
+        function showLoading() {
+            document.getElementById('loadingSpinner').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').classList.remove('active');
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast p-3 mb-3 border-${type}`;
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}
+                        text-${type} me-2"></i>
+                    <div>${message}</div>
+                    <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            toastContainer.appendChild(toast);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        // Show welcome message for logged in users
+        document.addEventListener('DOMContentLoaded', function() {
+        @if (isAuthenticated)
+        {
+            <text>
+                    setTimeout(() => {
+                        showToast('Welcome back, @userName!', 'success');
+                    }, 1000);
+            </text>
+        }
+
+            // Handle AJAX requests
+            document.addEventListener('ajaxStart', showLoading);
+            document.addEventListener('ajaxStop', hideLoading);
+        });
+
+        // Enhanced form submission
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (!this.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                this.classList.add('was-validated');
+            });
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

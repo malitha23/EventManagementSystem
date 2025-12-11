@@ -1,0 +1,499 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Home";
+}
+<link href="~/css/site-homepage.css" rel="stylesheet" />
+<header class="hero-section text-center py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-3 fw-bold mb-3 text-white animate-pop">Welcome to EventFlow</h1>
+                <p class="lead mb-4 text-white-80">Discover, book, and manage extraordinary events with ease</p>
+                <div class="mt-4">
+                    @{
+                        var isAuthenticated = Context.Session.GetInt32("UserId") != null;
+                    }
+                    @if (!isAuthenticated)
+                    {
+                        <a href="/Account/Register" class="btn btn-light btn-lg rounded-pill me-3 px-4 py-3 shadow animate-fade-up">
+                            <i class="fas fa-user-plus me-2"></i> Join Now
+                        </a>
+                        <a href="/Account/Login" class="btn btn-outline-light btn-lg rounded-pill px-4 py-3 animate-fade-up">
+                            <i class="fas fa-sign-in-alt me-2"></i> Sign In
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/Events" class="btn btn-light btn-lg rounded-pill px-4 py-3 shadow animate-fade-up">
+                            <i class="fas fa-calendar-alt me-2"></i> Browse Events
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Featured Events Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="fw-bold mb-3 section-title">Featured Events</h2>
+                <p class="text-muted mb-0">Curated experiences that you don't want to miss</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="card event-card shadow-lg border-0 h-100 animate-fade-up">
+                    <div class="card-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1542751110-97427bbecf20?fit=crop&w=600&h=400&q=80" class="card-img-top" alt="Concert">
+                        <div class="card-date">
+                            <span class="date-day">15</span>
+                            <span class="date-month">JUN</span>
+                        </div>
+                        <div class="card-price">
+                            <span>From Rs49</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold">Summer Music Festival</h5>
+                            <span class="badge bg-primary rounded-pill">Live</span>
+                        </div>
+                        <p class="card-text text-muted mb-3">Experience the thrill of live music with top artists from around the world at our annual summer festival.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                <small class="text-muted">Central Park, NYC</small>
+                            </div>
+                            <div>
+                                <i class="fas fa-clock text-primary me-1"></i>
+                                <small class="text-muted">7:00 PM</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0 p-4 pt-0">
+                        <a href="#" class="btn btn-primary rounded-pill w-100 book-now-btn" data-event-id="1">
+                            <i class="fas fa-ticket-alt me-2"></i> Book Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card event-card shadow-lg border-0 h-100 animate-fade-up" style="animation-delay: 0.1s">
+                    <div class="card-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1511578314322-379afb476865?fit=crop&w=600&h=400&q=80" class="card-img-top" alt="Conference">
+                        <div class="card-date">
+                            <span class="date-day">22</span>
+                            <span class="date-month">JUN</span>
+                        </div>
+                        <div class="card-price">
+                            <span>From Rs99</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold">Tech Innovation Summit</h5>
+                            <span class="badge bg-success rounded-pill">Conference</span>
+                        </div>
+                        <p class="card-text text-muted mb-3">Join industry leaders for a deep dive into the future of technology and innovation.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                <small class="text-muted">Convention Center</small>
+                            </div>
+                            <div>
+                                <i class="fas fa-clock text-primary me-1"></i>
+                                <small class="text-muted">9:00 AM</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0 p-4 pt-0">
+                        <a href="#" class="btn btn-primary rounded-pill w-100 book-now-btn" data-event-id="2">
+                            <i class="fas fa-ticket-alt me-2"></i> Book Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card event-card shadow-lg border-0 h-100 animate-fade-up" style="animation-delay: 0.2s">
+                    <div class="card-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?fit=crop&w=600&h=400&q=80" class="card-img-top" alt="Art Exhibition">
+                        <div class="card-date">
+                            <span class="date-day">05</span>
+                            <span class="date-month">JUL</span>
+                        </div>
+                        <div class="card-price">
+                            <span>From Rs25</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold">Modern Art Exhibition</h5>
+                            <span class="badge bg-warning text-dark rounded-pill">Exhibition</span>
+                        </div>
+                        <p class="card-text text-muted mb-3">Explore contemporary art from emerging and established artists in a stunning gallery setting.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                <small class="text-muted">City Art Gallery</small>
+                            </div>
+                            <div>
+                                <i class="fas fa-clock text-primary me-1"></i>
+                                <small class="text-muted">10:00 AM - 8:00 PM</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0 p-4 pt-0">
+                        <a href="#" class="btn btn-primary rounded-pill w-100 book-now-btn" data-event-id="3">
+                            <i class="fas fa-ticket-alt me-2"></i> Book Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="#" class="btn btn-lg btn-outline-primary rounded-pill px-5 py-3 view-events-btn">
+                <i class="fas fa-calendar-alt me-2"></i> View All Events
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Event Categories Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="fw-bold mb-3 section-title">Browse by Category</h2>
+                <p class="text-muted">Find events that match your interests</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="category-card text-center p-4 rounded-3 shadow-sm h-100 animate-fade-up">
+                    <div class="category-icon mb-3">
+                        <i class="fas fa-music fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Concerts & Music</h5>
+                    <p class="text-muted small">Live performances from your favorite artists</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary rounded-pill mt-2">Explore</a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="category-card text-center p-4 rounded-3 shadow-sm h-100 animate-fade-up" style="animation-delay: 0.1s">
+                    <div class="category-icon mb-3">
+                        <i class="fas fa-chalkboard-teacher fa-3x text-success"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Conferences</h5>
+                    <p class="text-muted small">Learn from industry experts and innovators</p>
+                    <a href="#" class="btn btn-sm btn-outline-success rounded-pill mt-2">Explore</a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="category-card text-center p-4 rounded-3 shadow-sm h-100 animate-fade-up" style="animation-delay: 0.2s">
+                    <div class="category-icon mb-3">
+                        <i class="fas fa-palette fa-3x text-warning"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Art & Culture</h5>
+                    <p class="text-muted small">Exhibitions, theater, and cultural experiences</p>
+                    <a href="#" class="btn btn-sm btn-outline-warning rounded-pill mt-2">Explore</a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="category-card text-center p-4 rounded-3 shadow-sm h-100 animate-fade-up" style="animation-delay: 0.3s">
+                    <div class="category-icon mb-3">
+                        <i class="fas fa-utensils fa-3x text-danger"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Food & Drink</h5>
+                    <p class="text-muted small">Culinary festivals, wine tastings, and more</p>
+                    <a href="#" class="btn btn-sm btn-outline-danger rounded-pill mt-2">Explore</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming Events Section -->
+<section class="py-5" style="background: #f8f9fa;">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="fw-bold mb-3 section-title">Upcoming Events</h2>
+                <p class="text-muted">Don't miss these exciting events coming soon</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="upcoming-card d-flex align-items-center p-3 rounded-3 shadow-sm bg-white animate-fade-up">
+                    <div class="upcoming-date text-center me-3">
+                        <div class="date-day fw-bold text-primary">28</div>
+                        <div class="date-month text-muted small">JUN</div>
+                    </div>
+                    <div class="upcoming-details flex-grow-1">
+                        <h6 class="fw-bold mb-1">Food & Wine Festival</h6>
+                        <p class="text-muted small mb-0">Downtown Square • 6:00 PM</p>
+                    </div>
+                    <div class="upcoming-action">
+                        <a href="#" class="btn btn-sm btn-outline-primary rounded-pill">Details</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="upcoming-card d-flex align-items-center p-3 rounded-3 shadow-sm bg-white animate-fade-up" style="animation-delay: 0.1s">
+                    <div class="upcoming-date text-center me-3">
+                        <div class="date-day fw-bold text-primary">03</div>
+                        <div class="date-month text-muted small">JUL</div>
+                    </div>
+                    <div class="upcoming-details flex-grow-1">
+                        <h6 class="fw-bold mb-1">Marathon 2023</h6>
+                        <p class="text-muted small mb-0">City Center • 7:00 AM</p>
+                    </div>
+                    <div class="upcoming-action">
+                        <a href="#" class="btn btn-sm btn-outline-primary rounded-pill">Details</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="upcoming-card d-flex align-items-center p-3 rounded-3 shadow-sm bg-white animate-fade-up" style="animation-delay: 0.2s">
+                    <div class="upcoming-date text-center me-3">
+                        <div class="date-day fw-bold text-primary">12</div>
+                        <div class="date-month text-muted small">JUL</div>
+                    </div>
+                    <div class="upcoming-details flex-grow-1">
+                        <h6 class="fw-bold mb-1">Film Premiere Night</h6>
+                        <p class="text-muted small mb-0">Royal Theater • 8:30 PM</p>
+                    </div>
+                    <div class="upcoming-action">
+                        <a href="#" class="btn btn-sm btn-outline-primary rounded-pill">Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="fw-bold mb-3 section-title">How It Works</h2>
+                <p class="text-muted">Booking events has never been easier</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 text-center animate-fade-up">
+                <div class="step-circle mx-auto mb-3">
+                    <span class="step-number">1</span>
+                </div>
+                <h5 class="fw-bold mb-2">Browse Events</h5>
+                <p class="text-muted">Explore our curated collection of events across various categories</p>
+            </div>
+
+            <div class="col-lg-4 text-center animate-fade-up" style="animation-delay: 0.1s">
+                <div class="step-circle mx-auto mb-3">
+                    <span class="step-number">2</span>
+                </div>
+                <h5 class="fw-bold mb-2">Select & Book</h5>
+                <p class="text-muted">Choose your preferred event and complete the booking in seconds</p>
+            </div>
+
+            <div class="col-lg-4 text-center animate-fade-up" style="animation-delay: 0.2s">
+                <div class="step-circle mx-auto mb-3">
+                    <span class="step-number">3</span>
+                </div>
+                <h5 class="fw-bold mb-2">Enjoy Experience</h5>
+                <p class="text-muted">Receive your tickets and get ready for an unforgettable experience</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="fw-bold mb-3 text-white">What Our Users Say</h2>
+                <p class="text-white-80">Join thousands of satisfied event-goers</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="testimonial-card p-4 rounded-3 bg-white shadow h-100 animate-fade-up">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://randomuser.me/api/portraits/women/32.jpg" class="rounded-circle me-3" width="50" alt="User">
+                        <div>
+                            <h6 class="fw-bold mb-0">Sarah Johnson</h6>
+                            <small class="text-muted">Event Enthusiast</small>
+                        </div>
+                    </div>
+                    <p class="text-muted">"Booking through EventFlow was seamless! Found the perfect concert and got great seats at a reasonable price."</p>
+                    <div class="text-warning">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="testimonial-card p-4 rounded-3 bg-white shadow h-100 animate-fade-up" style="animation-delay: 0.1s">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://randomuser.me/api/portraits/men/54.jpg" class="rounded-circle me-3" width="50" alt="User">
+                        <div>
+                            <h6 class="fw-bold mb-0">Michael Chen</h6>
+                            <small class="text-muted">Tech Professional</small>
+                        </div>
+                    </div>
+                    <p class="text-muted">"The Tech Innovation Summit I attended through this platform was outstanding. Well-organized and insightful."</p>
+                    <div class="text-warning">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="testimonial-card p-4 rounded-3 bg-white shadow h-100 animate-fade-up" style="animation-delay: 0.2s">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://randomuser.me/api/portraits/women/67.jpg" class="rounded-circle me-3" width="50" alt="User">
+                        <div>
+                            <h6 class="fw-bold mb-0">Emma Williams</h6>
+                            <small class="text-muted">Art Lover</small>
+                        </div>
+                    </div>
+                    <p class="text-muted">"The modern art exhibition was breathtaking. The booking process was quick and the digital tickets were convenient."</p>
+                    <div class="text-warning">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="py-5" style="background: #f8f9fa;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center">
+                <h3 class="fw-bold mb-3">Never Miss an Event</h3>
+                <p class="text-muted mb-4">Subscribe to our newsletter and get updates on the latest events and exclusive offers.</p>
+                <div class="input-group mb-3 shadow-sm">
+                    <input type="email" class="form-control form-control-lg rounded-start-pill" placeholder="Enter your email address">
+                    <button class="btn btn-primary rounded-end-pill px-4" type="button">Subscribe</button>
+                </div>
+                <small class="text-muted">We respect your privacy. Unsubscribe at any time.</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var userRole = '@Context.Session.GetString("UserRole")';
+            var isLoggedIn = '@(Context.Session.GetInt32("UserId") != null)' === 'True';
+
+            // Stagger animation for cards
+            const animatedCards = document.querySelectorAll('.animate-fade-up');
+            animatedCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+
+            // Handle booking button clicks
+            document.querySelectorAll(".book-now-btn").forEach(function(btn) {
+                btn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    if (isLoggedIn && userRole?.toLowerCase() === "customer") {
+                        const eventId = this.getAttribute('data-event-id');
+                        window.location.href = `/Customer/BookEvent/${eventId}`;
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Access Denied',
+                            text: 'Please login as Customer to book events!',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'Login'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/Account/Login';
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Handle view all events button
+            var viewAllBtn = document.querySelector(".view-events-btn");
+            if (viewAllBtn) {
+                viewAllBtn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    if (isLoggedIn && userRole?.toLowerCase() === "customer") {
+                        window.location.href = "/Events";
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Please login',
+                            text: 'Only Customers can view all events!',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'Login'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/Account/Login';
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Handle category explore buttons
+            document.querySelectorAll('.category-card .btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (isLoggedIn) {
+                        window.location.href = '/Events';
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Login Required',
+                            text: 'Please login to explore events by category',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'Login'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/Account/Login';
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,309 @@
+﻿@model EventManagementSystem.Models.Booking
+
+@{
+    ViewData["Title"] = "Booking Confirmation";
+    Layout = "_Layout";
+}
+
+<link href="~/css/checkout.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<div class="confirmation-container">
+    <!-- Confetti Animation -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <div class="confirmation-card">
+        <!-- Success Header -->
+        <div class="success-header">
+            <div class="success-badge">
+                <i class="bi bi-shield-check"></i>
+                <span>Secured Booking</span>
+            </div>
+
+            <div class="success-icon-container">
+                <div class="success-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="icon-ring"></div>
+                <div class="icon-ring ring-delay"></div>
+            </div>
+
+            <h1 class="display-5 fw-bold mb-3">Booking Confirmed!</h1>
+            <p class="lead mb-4">Your tickets have been secured and are ready for download.</p>
+
+            <div class="booking-id">
+                <i class="bi bi-receipt"></i>
+                <span>Booking ID: #@Model.Id</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-wrapper">
+            <!-- Event Timeline -->
+            <div class="timeline animated-element">
+                <div class="timeline-item">
+                    <div class="timeline-marker success">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h6 class="fw-bold mb-1">Booking Confirmed</h6>
+                        <small class="text-muted">Just now</small>
+                        <p class="mb-0">Your booking has been processed successfully</p>
+                    </div>
+                    <div class="timeline-connector"></div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-marker upcoming">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h6 class="fw-bold mb-1">Event Date</h6>
+                        <small class="text-muted">@Model.Event?.EventDate.ToString("dd MMM yyyy")</small>
+                        <p class="mb-0">@Model.Event?.StartTime.ToString(@"hh\:mm") - @Model.Event?.EndTime.ToString(@"hh\:mm")</p>
+                    </div>
+                    <div class="timeline-connector"></div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-marker upcoming">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h6 class="fw-bold mb-1">Venue</h6>
+                        <small class="text-muted">@Model.Event?.Venue?.Location</small>
+                        <p class="mb-0">@Model.Event?.Venue?.Name</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Details -->
+            <div class="details-grid animated-element delay-1">
+                <div class="detail-card">
+                    <div class="detail-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="detail-content">
+                        <h6 class="fw-bold mb-2">Event</h6>
+                        <p class="mb-0 fs-5">@Model.Event?.Title</p>
+                        <small class="text-muted">@Model.Event?.EventDate.ToString("dddd, dd MMMM yyyy")</small>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <div class="detail-icon">
+                        <i class="bi bi-ticket-perforated"></i>
+                    </div>
+                    <div class="detail-content">
+                        <h6 class="fw-bold mb-2">Tickets</h6>
+                        <p class="mb-0 fs-5">@Model.NumberOfTickets tickets</p>
+                        <small class="text-muted">@Model.Tickets.Count() issued</small>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <div class="detail-icon">
+                        <i class="bi bi-currency-exchange"></i>
+                    </div>
+                    <div class="detail-content">
+                        <h6 class="fw-bold mb-2">Payment</h6>
+                        <p class="mb-0 fs-5 text-success">Rs @Model.FinalAmount.ToString("N2")</p>
+                        <small class="text-muted">Paid in full</small>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <div class="detail-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div class="detail-content">
+                        <h6 class="fw-bold mb-2">Booking Time</h6>
+                        <p class="mb-0 fs-5">@DateTime.Now.ToString("hh:mm tt")</p>
+                        <small class="text-muted">@DateTime.Now.ToString("dd MMM yyyy")</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loyalty Points -->
+            <div class="loyalty-card animated-element delay-2">
+                <div class="loyalty-content">
+                    <i class="bi bi-award-fill"></i>
+                    <div>
+                        <h5 class="mb-0">Loyalty Points Earned</h5>
+                        <p class="text-muted mb-0">You've earned points with this booking</p>
+                    </div>
+                </div>
+                <div class="points-badge">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>@Model.LoyaltyEarned Points</span>
+                </div>
+                <p class="mt-2 mb-0">These points can be redeemed for discounts on future bookings</p>
+            </div>
+
+            <!-- Tickets Section -->
+            <div class="tickets-section animated-element delay-3">
+                <div class="section-header">
+                    <h4>
+                        <i class="bi bi-ticket-detailed"></i>
+                        Your Tickets (@Model.Tickets.Count())
+                    </h4>
+                </div>
+
+                <div class="tickets-grid">
+                    @foreach (var ticket in Model.Tickets)
+                    {
+                        <div class="ticket-card" id="ticket-@ticket.Id">
+                            <div class="ticket-glow"></div>
+                            
+
+                            <div class="ticket-body">
+                                <div class="ticket-card2">
+                                    <div class="ticket-header">
+                                        <div class="ticket-number">@ticket.TicketNumber</div>
+                                        <div class="ticket-status">
+                                            <span class="status-badge confirmed">Confirmed</span>
+                                        </div>
+                                    </div>
+                                <div class="qr-wrapper">
+                                    <div class="qr-container">
+                                        <img src="@ticket.QRCode" alt="QR Code" class="qr-image" />
+                                    </div>
+                                </div>
+
+                                <div class="ticket-info">
+                                    <div class="info-item">
+                                        <i class="bi bi-calendar"></i>
+                                        <span>@Model.Event?.EventDate.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="bi bi-clock"></i>
+                                        <span>@Model.Event?.StartTime.ToString(@"hh\:mm") - @Model.Event?.EndTime.ToString(@"hh\:mm")</span>
+                                    </div>
+                                        <div class="info-item">
+                                            <i class="bi bi-geo-alt"></i>
+                                            <span>@Model.Event?.Venue?.Name</span>
+                                        </div>
+                                </div>
+                                </div>
+
+                                <div class="ticket-actions">
+                                    <button onclick="downloadTicket('@ticket.TicketNumber', '@ticket.QRCode')"
+                                            class="action-btn download-btn"
+                                            title="Download Ticket">
+                                        <i class="bi bi-download"></i>
+                                        <span>Download</span>
+                                    </button>
+
+                                    <button onclick="shareTicket('@ticket.TicketNumber', '@ticket.QRCode')"
+                                            class="action-btn share-btn"
+                                            title="Share Ticket">
+                                        <i class="bi bi-share"></i>
+                                        <span>Share</span>
+                                    </button>
+
+                                    <button onclick="printTicket('ticket-@ticket.Id')"
+                                            class="action-btn print-btn"
+                                            title="Print Ticket">
+                                        <i class="bi bi-printer"></i>
+                                        <span>Print</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons animated-element delay-4">
+                <a href="@Url.Action("MyBookings")" class="btn btn-primary">
+                    <i class="bi bi-journal-text"></i>
+                    View My Bookings
+                </a>
+                <a href="@Url.Action("Dashboard", "Customer")" class="btn btn-outline-primary">
+                    <i class="bi bi-calendar-plus"></i>
+                    Find More Events
+                </a>
+                <button onclick="printAllTickets()" class="btn btn-outline-success">
+                    <i class="bi bi-printer"></i>
+                    Print All Tickets
+                </button>
+                <button onclick="shareAllTickets()" class="btn btn-outline-info">
+                    <i class="bi bi-share-fill"></i>
+                    Share All
+                </button>
+            </div>
+
+            <!-- Important Information -->
+            <div class="info-section animated-element delay-5">
+                <div class="info-header">
+                    <i class="bi bi-info-circle"></i>
+                    <h6>Important Information</h6>
+                </div>
+                <div class="info-content">
+                    <div class="info-item">
+                        <i class="bi bi-qr-code"></i>
+                        <div>
+                            <strong>QR Code:</strong> Present at venue entrance
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="bi bi-clock"></i>
+                        <div>
+                            <strong>Arrival Time:</strong> 30 minutes before event
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="bi bi-phone"></i>
+                        <div>
+                            <strong>Support:</strong> support@events.com
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Share Ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="share-options">
+                    <button onclick="shareViaWhatsApp()" class="share-option">
+                        <i class="bi bi-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </button>
+                    <button onclick="shareViaEmail()" class="share-option">
+                        <i class="bi bi-envelope"></i>
+                        <span>Email</span>
+                    </button>
+                    <button onclick="shareViaSMS()" class="share-option">
+                        <i class="bi bi-chat"></i>
+                        <span>SMS</span>
+                    </button>
+                    <button onclick="copyToClipboard()" class="share-option">
+                        <i class="bi bi-clipboard"></i>
+                        <span>Copy Link</span>
+                    </button>
+                </div>
+                <div class="share-link mt-3">
+                    <input type="text" id="shareUrl" class="form-control" readonly>
+                    <button onclick="copyShareUrl()" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script src="~/js/booking-confirmation.js"></script>
