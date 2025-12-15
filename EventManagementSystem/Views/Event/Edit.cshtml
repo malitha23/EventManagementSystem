@@ -1,0 +1,142 @@
+﻿@model EventManagementSystem.Models.Event
+@{
+    ViewData["Title"] = "Edit Event";
+    Layout = "_Layout";
+}
+
+
+<h2>Edit Event</h2>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label">Title</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label">Description</label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label">Category</label>
+        <select asp-for="CategoryId" class="form-select" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name", Model.CategoryId))">
+            <option value="">-- Select Category --</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="VenueId" class="form-label">Venue</label>
+        <select asp-for="VenueId" class="form-select" asp-items="@(new SelectList(ViewBag.Venues, "Id", "Name", Model.VenueId))">
+            <option value="">-- Select Venue --</option>
+        </select>
+        <span asp-validation-for="VenueId" class="text-danger"></span>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col">
+            <label asp-for="EventDate" class="form-label">Date</label>
+            <input asp-for="EventDate" type="date" class="form-control" />
+            <span asp-validation-for="EventDate" class="text-danger"></span>
+        </div>
+        <div class="col">
+            <label asp-for="StartTime" class="form-label">Start Time</label>
+            <input asp-for="StartTime" type="time" class="form-control" />
+            <span asp-validation-for="StartTime" class="text-danger"></span>
+        </div>
+        <div class="col">
+            <label asp-for="EndTime" class="form-label">End Time</label>
+            <input asp-for="EndTime" type="time" class="form-control" />
+            <span asp-validation-for="EndTime" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TicketPrice" class="form-label">Ticket Price</label>
+        <input asp-for="TicketPrice" type="number" step="0.01" class="form-control" />
+        <span asp-validation-for="TicketPrice" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TotalCapacity" class="form-label">Total Capacity</label>
+        <input asp-for="TotalCapacity" type="number" class="form-control" />
+        <span asp-validation-for="TotalCapacity" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Existing Images</label>
+        <div class="d-flex flex-wrap mb-2">
+            @if (Model.EventImages != null && Model.EventImages.Any())
+            {
+                @foreach (var img in Model.EventImages)
+                {
+                    <div class="position-relative m-2" id="image-@img.Id">
+                        <img src="@img.ImageUrl" class="img-thumbnail" style="max-width:150px;" />
+                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0"
+                                onclick="deleteImage(@img.Id)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No images uploaded yet. </p>
+            }
+        </div>
+
+    
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Upload New Images</label>
+        <input type="file" name="NewImages" multiple class="form-control" />
+        <small class="text-muted">You can upload multiple images</small>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label">Status</label>
+        <select asp-for="Status" class="form-select">
+            <option value="upcoming">Upcoming</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Event</button>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+</form>
+<br>
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+}
+
+<script>
+    window.deleteImage = function(imageId) {
+        if (!confirm("Are you sure you want to delete this image?")) return;
+
+        $.ajax({
+            url: '@Url.Action("DeleteImage", "Event")',
+            type: "POST",
+            data: { id: imageId },
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function (response) {
+                if (response.success) {
+                    document.getElementById("image-" + imageId).remove();
+                } else {
+                    alert(response.message || "Failed to delete image.");
+                }
+            },
+            error: function () {
+                alert("An error occurred while deleting the image.");
+            }
+        });
+    };
+</script>

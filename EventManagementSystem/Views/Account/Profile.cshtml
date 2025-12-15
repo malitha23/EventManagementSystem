@@ -1,0 +1,799 @@
+﻿@using EventManagementSystem.Data
+@using Microsoft.EntityFrameworkCore
+@model EventManagementSystem.Models.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Profile";
+    Layout = "_Layout";
+    var isCustomer = Model.UserRole == "customer";
+    var isOrganizer = Model.UserRole == "organizer";
+    var isAdmin = Model.UserRole == "admin";
+}
+
+
+<link href="~/css/profilepage.css" rel="stylesheet" />
+
+
+<div class="profile-container">
+    <h2 class="profile-header">
+        <i class="fas fa-user-circle me-2"></i>@ViewData["Title"]
+        @if (isOrganizer)
+        {
+            <span class="badge bg-warning ms-2">Organizer</span>
+        }
+        @if (isAdmin)
+        {
+            <span class="badge bg-danger ms-2">Admin</span>
+        }
+    </h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Left Column - Profile Info -->
+        <div class="col-lg-4">
+            <!-- Profile Card -->
+            <div class="card profile-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Profile Information</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="profile-image-container">
+                        <img src="@Url.Content(Model.User.ProfileImage ?? "/images/no-profile.webp")"
+                             alt="Profile Image" class="profile-img">
+                        <div class="profile-overlay">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <h4 class="profile-name mt-3">@Model.User.Name</h4>
+                    <div class="profile-details">
+                        <p class="mb-2">
+                            <i class="fas fa-envelope me-2 text-muted"></i>
+                            <span>@Model.User.Email</span>
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-phone me-2 text-muted"></i>
+                            <span>@(string.IsNullOrEmpty(Model.User.Phone) ? "Not provided" : Model.User.Phone)</span>
+                        </p>
+                    </div>
+                    @if (isCustomer)
+                    {
+                        <div class="loyalty-badge">
+                            <i class="fas fa-crown me-2"></i>
+                            <span>Loyalty Points: <strong>@Model.LoyaltyPoints</strong></span>
+                        </div>
+                    }
+                    @if (isOrganizer)
+                    {
+                        <div class="organizer-badge">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            <span>Events Created: <strong>@Model.OrganizerStats?.TotalEvents</strong></span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Update Profile Form -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Update Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Profile" method="post" enctype="multipart/form-data" class="profile-form">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-user me-1"></i>Full Name</label>
+                            <input asp-for="User.Name" class="form-control form-control-lg" required
+                                   placeholder="Enter your full name">
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label class="form-label"><i class="fas fa-envelope me-1"></i>Email Address</label>
+                            <input asp-for="User.Email" type="email" class="form-control form-control-lg" readonly
+                                   placeholder="Enter your email">
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label class="form-label"><i class="fas fa-phone me-1"></i>Phone Number</label>
+                            <input asp-for="User.Phone" class="form-control form-control-lg"
+                                   placeholder="Enter your phone number">
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label class="form-label"><i class="fas fa-image me-1"></i>Profile Image</label>
+                            <div class="row align-items-center">
+                                
+
+                                <!-- File Upload and New Preview -->
+                                <div class="col-md-9" >
+                                    <div class="file-upload-area">
+                                        <div class="file-upload row align-items-center">
+                                            <input type="file" name="profileImageFile" class="form-control d-none"
+                                                   accept="image/*" id="profileImageUpload">
+                                            <label for="profileImageUpload" class="file-upload-label" >
+                                                <i class="fas fa-cloud-upload-alt me-2"></i>Choose New Image
+                                            </label>
+                                        </div>
+
+                                        <!-- New Image Preview Container -->
+                                        <div class="new-image-preview mt-3" id="newImagePreview" style="display: none;">
+                                            <div class="preview-header">
+                                                <span>New Image Preview:</span>
+                                                <button type="button" class="btn-close btn-close-sm" id="clearPreview"></button>
+                                            </div>
+                                            <img id="imagePreview" src="#" alt="New Image Preview" class="new-preview-img">
+                                            <small class="text-muted d-block text-center mt-1">New (Click to remove)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+                            <i class="fas fa-save me-2"></i>Update Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Tabs Content -->
+        <div class="col-lg-8">
+            @if (isCustomer)
+            {
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-pills nav-fill custom-tabs mb-4" id="profileTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="bookings-tab" data-bs-toggle="tab"
+                            data-bs-target="#bookings" type="button">
+                        <i class="fas fa-calendar-alt me-2"></i><span>My Bookings</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="loyalty-tab" data-bs-toggle="tab"
+                            data-bs-target="#loyalty" type="button">
+                        <i class="fas fa-star me-2"></i><span>Loyalty History</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="payments-tab" data-bs-toggle="tab"
+                            data-bs-target="#payments" type="button">
+                        <i class="fas fa-credit-card me-2"></i><span>Payment History</span>
+                    </button>
+                </li>
+            </ul> 
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="profileTabContent">
+                <!-- Bookings Tab -->
+                <div class="tab-pane fade show active" id="bookings">
+                    @if (Model.Bookings.Count == 0)
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times fa-3x text-muted"></i>
+                            <h5>No Bookings Yet</h5>
+                            <p>You haven't made any bookings yet.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bookings-list">
+                            @foreach (var booking in Model.Bookings)
+                            {
+                                <div class="booking-card">
+                                    <div class="booking-header">
+                                        <h5 class="booking-title">@booking.Event?.Title</h5>
+                                        <span class="booking-date">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            @booking.Event?.EventDate.ToString("MMM dd, yyyy")
+                                        </span>
+                                    </div>
+                                    <div class="booking-details">
+                                        <div class="detail-item">
+                                            <span class="detail-label">Tickets:</span>
+                                            <span class="detail-value">@booking.NumberOfTickets</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Amount:</span>
+                                            <span class="detail-value amount">@booking.FinalAmount.ToString("C")</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Booking ID:</span>
+                                            <span class="detail-value">@booking.Id</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- QR Codes Row - All in one row -->
+                                    <div class="qr-section">
+                                        <h6 class="qr-section-title" data-ticket-count="@booking.Tickets.Count">
+                                            <i class="fas fa-qrcode me-2"></i>Your Ticket QR Codes
+                                        </h6>
+                                        <div class="qr-codes-container">
+                                            @foreach (var ticket in booking.Tickets)
+                                            {
+                                                <div class="qr-code-item">
+                                                    <div class="qr-code-header">
+                                                        <span class="ticket-number">@ticket.TicketNumber</span>
+                                                    </div>
+                                                    <div class="qr-code-wrapper">
+                                                        <img src="@Url.Content(ticket.QRCode)"
+                                                             alt="QR Code for ticket @ticket.TicketNumber"
+                                                             class="qr-code-img">
+                                                        <div class="qr-overlay">
+                                                            <button class="btn btn-sm btn-light qr-enlarge"
+                                                                    data-ticket="@ticket.TicketNumber"
+                                                                    data-qr="@ticket.QRCode">
+                                                                <i class="fas fa-expand"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="qr-footer">
+                                                        <small class="text-muted">Ticket ID: @ticket.Id</small>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="qr-help">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Scan these QR codes at the event entrance
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Loyalty History Tab -->
+                <div class="tab-pane fade" id="loyalty">
+                    @if (Model.LoyaltyHistory.Count == 0)
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-star fa-3x text-muted"></i>
+                            <h5>No Loyalty History</h5>
+                            <p>Your loyalty points will appear here after bookings.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-calendar me-1"></i>Date</th>
+                                        <th><i class="fas fa-tag me-1"></i>Type</th>
+                                        <th><i class="fas fa-coins me-1"></i>Points</th>
+                                        <th><i class="fas fa-receipt me-1"></i>Booking</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var lh in Model.LoyaltyHistory)
+                                    {
+                                        <tr class="@(lh.Points > 0 ? "table-success" : "table-danger")">
+                                            <td>@lh.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <span class="badge @(lh.Points > 0 ? "bg-success" : "bg-danger")">
+                                                    @lh.ChangeType
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <strong>@(lh.Points > 0 ? "+" : "")@lh.Points</strong>
+                                            </td>
+                                            <td>#@lh.BookingId</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+
+                <!-- Payments Tab -->
+                <div class="tab-pane fade" id="payments">
+                    @if (Model.Payments.Count == 0)
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-credit-card fa-3x text-muted"></i>
+                            <h5>No Payments</h5>
+                            <p>Your payment history will appear here.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-receipt me-1"></i>Booking ID</th>
+                                        <th><i class="fas fa-calendar-alt me-1"></i>Event</th>
+                                        <th><i class="fas fa-dollar-sign me-1"></i>Amount</th>
+                                        <th><i class="fas fa-info-circle me-1"></i>Status</th>
+                                        <th><i class="fas fa-clock me-1"></i>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in Model.Payments)
+                                    {
+                                        <tr>
+                                            <td>#@payment.BookingId</td>
+                                            <td>@payment.Booking?.Event?.Title</td>
+                                            <td class="amount">@payment.Amount.ToString("C")</td>
+                                            <td>
+                                                @{
+                                                    var statusClass = payment.Status.ToLower() switch
+                                                    {
+                                                        "completed" or "success" => "badge-success",
+                                                        "pending" => "badge-warning",
+                                                        "failed" => "badge-danger",
+                                                        _ => "badge-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @statusClass">@payment.Status</span>
+                                            </td>
+                                            <td>@payment.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+            else if (isOrganizer)
+            {
+                <!-- Organizer Dashboard -->
+                <div class="organizer-dashboard">
+
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="stats-card card bg-primary text-white h-100">
+                                <div class="card-body">
+                                    <div class="stats-icon">
+                                        <i class="fas fa-calendar-alt fa-2x"></i>
+                                    </div>
+                                    <h4 class="stats-number">@Model.OrganizerStats?.TotalEvents</h4>
+                                    <p class="stats-label">Total Events</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="stats-card card bg-success text-white h-100">
+                                <div class="card-body">
+                                    <div class="stats-icon">
+                                        <i class="fas fa-calendar-check fa-2x"></i>
+                                    </div>
+                                    <h4 class="stats-number">@Model.OrganizerStats?.ActiveEvents</h4>
+                                    <p class="stats-label">Active Events</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="stats-card card bg-info text-white h-100">
+                                <div class="card-body">
+                                    <div class="stats-icon">
+                                        <i class="fas fa-ticket-alt fa-2x"></i>
+                                    </div>
+                                    <h4 class="stats-number">@Model.OrganizerStats?.TotalTicketsSold</h4>
+                                    <p class="stats-label">Tickets Sold</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="stats-card card bg-warning text-white h-100">
+                                <div class="card-body">
+                                    <div class="stats-icon">
+                                        <i class="fas fa-money-bill-wave fa-2x"></i>
+                                    </div>
+                                    <h4 class="stats-number">LKR @Model.OrganizerStats?.TotalRevenue.ToString("N0")</h4>
+                                    <p class="stats-label">Total Revenue</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Events List -->
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>My Events</h5>
+
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createEventModal">
+                                <i class="fas fa-plus me-2"></i>New Event
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.OrganizerEvents.Count == 0)
+                            {
+                                <div class="empty-state text-center py-5">
+                                    <i class="fas fa-calendar-times fa-3x text-muted"></i>
+                                    <h5 class="mt-3">No Events Created</h5>
+                                    <p class="text-muted">You haven't created any events yet.</p>
+                                    <a asp-controller="Event" asp-action="Create" class="btn btn-primary mt-2">
+                                        <i class="fas fa-plus me-1"></i>Create Your First Event
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Event</th>
+                                                <th>Date</th>
+                                                <th>Venue</th>
+                                                <th>Status</th>
+                                                <th>Tickets</th>
+                                                <th>Revenue</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var ev in Model.OrganizerEvents)
+                                            {
+                                                var bookings = await Context.RequestServices.GetRequiredService<ApplicationDbContext>()
+                                                .Bookings
+                                                .Where(b => b.EventId == ev.Id)
+                                                .ToListAsync();
+
+                                                var ticketsSold = bookings.Sum(b => b.NumberOfTickets);
+                                                var revenue = bookings.Where(b => b.PaymentStatus == "paid").Sum(b => b.FinalAmount);
+                                                var occupancy = ev.TotalCapacity > 0 ? (ticketsSold * 100.0) / ev.TotalCapacity : 0;
+
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            @if (ev.EventImages?.Any() == true)
+                                                            {
+                                                                <img src="@ev.EventImages.First().ImageUrl"
+                                                                     alt="@ev.Title"
+                                                                     class="event-thumbnail me-2"
+                                                                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                            }
+                                                            <div>
+                                                                <strong>@ev.Title</strong><br>
+                                                                <small class="text-muted">@ev.Category?.Name</small>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>@ev.EventDate.ToString("MMM dd, yyyy")</td>
+                                                    <td>@ev.Venue?.Name</td>
+                                                    <td>
+                                                        @{
+                                                            var statusClass = ev.Status.ToLower() switch
+                                                            {
+                                                                "upcoming" => "badge bg-success",
+                                                                "ongoing" => "badge bg-info",
+                                                                "completed" => "badge bg-secondary",
+                                                                "cancelled" => "badge bg-danger",
+                                                                "draft" => "badge bg-warning",
+                                                                _ => "badge bg-secondary"
+                                                            };
+                                                        }
+                                                        <span class="@statusClass">@ev.Status</span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="ticket-info">
+                                                            <small>@ticketsSold/@ev.TotalCapacity</small>
+                                                            <div class="progress" style="height: 4px; width: 80px;">
+                                                                <div class="progress-bar @(occupancy >= 80 ? "bg-danger" : "bg-success")"
+                                                                     style="width: @(Math.Min(occupancy, 100))%"></div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-success fw-bold">LKR @revenue.ToString("N0")</td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a asp-controller="Event"
+                                                               asp-action="Details"
+                                                               asp-route-id="@ev.Id"
+                                                               class="btn btn-outline-primary">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
+
+                                                            <a asp-controller="OrganizerBooking"
+                                                               asp-action="EventBookings"
+                                                               asp-route-id="@ev.Id"
+                                                               class="btn btn-outline-info">
+                                                                <i class="fas fa-users"></i>
+                                                            </a>
+
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Quick Stats</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="quick-stats">
+                                        <div class="stat-item">
+                                            <i class="fas fa-bookmark text-primary"></i>
+                                            <div>
+                                                <strong>@Model.OrganizerStats?.TotalBookings</strong>
+                                                <small>Total Bookings</small>
+                                            </div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <i class="fas fa-history text-success"></i>
+                                            <div>
+                                                <strong>@Model.OrganizerStats?.PastEvents</strong>
+                                                <small>Past Events</small>
+                                            </div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <i class="fas fa-percentage text-info"></i>
+                                            <div>
+                                                @{
+                                                    var avgOccupancy = Model.OrganizerEvents.Count > 0 ?
+                                                    Model.OrganizerEvents.Average(e =>
+                                                    {
+                                                        var bookings = Context.RequestServices.GetRequiredService<ApplicationDbContext>()
+                                                                                    .Bookings
+                                                                                    .Where(b => b.EventId == e.Id)
+                                                                                    .Sum(b => b.NumberOfTickets);
+                                                        return e.TotalCapacity > 0 ? (bookings * 100.0) / e.TotalCapacity : 0;
+                                                    }) : 0;
+                                                }
+                                                <strong>@avgOccupancy.ToString("F1")%</strong>
+                                                <small>Avg Occupancy</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="quick-actions">
+                                         
+                                        <button type="button" class="btn btn-primary w-100 mb-2" data-bs-toggle="modal" data-bs-target="#createEventModal">
+                                            <i class="fas fa-plus me-2"></i>New Event
+                                        </button>
+                                        <a asp-controller="Organizer" asp-action="Dashboard" class="btn btn-success w-100 mb-2">
+                                            <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                                        </a>
+                                        <a asp-controller="OrganizerBooking" asp-action="Index" class="btn btn-info w-100">
+                                            <i class="fas fa-users me-2"></i>View All Bookings
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (isAdmin)
+            {
+                <!-- Admin Dashboard -->
+                <div class="admin-dashboard">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Admin Panel</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center py-5">
+                                <i class="fas fa-user-shield fa-3x text-primary mb-3"></i>
+                                <h4>Administrator Account</h4>
+                                <p class="text-muted">This is your admin profile page.</p>
+                                <div class="admin-actions mt-4">
+                                    <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-primary me-2">
+                                        <i class="fas fa-tachometer-alt me-1"></i>Admin Dashboard
+                                    </a>
+                                    <a asp-controller="Admin" asp-action="Users" class="btn btn-success me-2">
+                                        <i class="fas fa-users me-1"></i>Manage Users
+                                    </a>
+                                    <a asp-controller="Admin" asp-action="Events" class="btn btn-info">
+                                        <i class="fas fa-calendar me-1"></i>Manage Events
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalQrImage" src="" alt="QR Code" class="img-fluid">
+                <p id="modalTicketNumber" class="mt-2 text-muted"></p>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    
+
+    .new-image-preview {
+        border: 2px dashed #6c757d;
+        border-radius: 8px;
+        padding: 15px;
+        background: #f8f9fa;
+        text-align: center;
+    }
+
+    .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .btn-close-sm {
+        font-size: 0.7rem;
+        padding: 0.2rem;
+    }
+
+    .new-preview-img {
+        max-width: 100%;
+        max-height: 150px;
+        object-fit: contain;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+
+        .new-preview-img:hover {
+            transform: scale(1.05);
+        }
+
+    .file-upload-area {
+        width: 100%;
+    }
+
+  
+
+   
+</style>
+
+@await Html.PartialAsync("_CreateEventModal", Model.NewEvent)
+
+<script src="~/js/profile-page.js"></script>
+<script>
+        // Profile image preview functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileImageUpload = document.getElementById('profileImageUpload');
+        const imagePreview = document.getElementById('imagePreview');
+        const newImagePreview = document.getElementById('newImagePreview');
+        const clearPreview = document.getElementById('clearPreview');
+        const currentProfileImg = document.querySelector('.current-profile-img');
+
+        if (profileImageUpload) {
+            profileImageUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+
+                if (file) {
+                    // Check file type
+                    if (!file.type.match('image.*')) {
+                        alert('Please select an image file (JPEG, PNG, GIF, etc.)');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Check file size (max 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Image size should be less than 5MB');
+                        this.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        // Show new image preview
+                        imagePreview.src = e.target.result;
+                        newImagePreview.style.display = 'block';
+
+                        // Scroll to preview if needed
+                        newImagePreview.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'nearest'
+                        });
+                    }
+
+                    reader.readAsDataURL(file);
+                } else {
+                    // Hide preview if no file selected
+                    newImagePreview.style.display = 'none';
+                }
+            });
+        }
+
+        // Clear preview button
+        if (clearPreview) {
+            clearPreview.addEventListener('click', function() {
+                if (profileImageUpload) {
+                    profileImageUpload.value = '';
+                }
+                newImagePreview.style.display = 'none';
+            });
+        }
+
+        // Click on new image to remove it
+        if (imagePreview) {
+            imagePreview.addEventListener('click', function() {
+                if (profileImageUpload) {
+                    profileImageUpload.value = '';
+                }
+                newImagePreview.style.display = 'none';
+            });
+        }
+
+        // Form submission - show loading state
+        const profileForm = document.querySelector('.profile-form');
+        if (profileForm) {
+            profileForm.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+                    submitBtn.disabled = true;
+
+                    // Optional: Show upload progress if file is large
+                    const fileInput = document.getElementById('profileImageUpload');
+                    if (fileInput && fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        if (file.size > 2 * 1024 * 1024) { // > 2MB
+                            const progressDiv = document.createElement('div');
+                            progressDiv.className = 'upload-progress mt-2';
+                            progressDiv.innerHTML = `
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                         role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted">Uploading large image, please wait...</small>
+                            `;
+
+                            submitBtn.parentNode.insertBefore(progressDiv, submitBtn.nextSibling);
+
+                            // Simulate progress (in real app, use FormData with XMLHttpRequest for actual progress)
+                            let progress = 0;
+                            const interval = setInterval(() => {
+                                progress += 10;
+                                const progressBar = progressDiv.querySelector('.progress-bar');
+                                if (progressBar) {
+                                    progressBar.style.width = progress + '%';
+                                }
+                                if (progress >= 100) {
+                                    clearInterval(interval);
+                                }
+                            }, 200);
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+

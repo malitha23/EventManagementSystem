@@ -1,0 +1,214 @@
+﻿@model EventManagementSystem.Models.ViewModels.VenueEditViewModel
+
+@{
+    ViewData["Title"] = "Edit Venue";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Edit Venue</h1>
+        <a href="@Url.Action("Venues")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Venues
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Edit Venue Information</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditVenue" method="post" id="editVenueForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label asp-for="Name" class="form-label required"></label>
+                                <input asp-for="Name" class="form-control">
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label asp-for="Location" class="form-label required"></label>
+                                <input asp-for="Location" class="form-control">
+                                <span asp-validation-for="Location" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label asp-for="Description" class="form-label"></label>
+                                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label asp-for="Capacity" class="form-label required"></label>
+                                <div class="input-group">
+                                    <input asp-for="Capacity" type="number" class="form-control">
+                                    <span class="input-group-text">people</span>
+                                </div>
+                                <span asp-validation-for="Capacity" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Status (when you add IsActive field) -->
+                            <!--
+                            <div class="col-md-12">
+                                <label class="form-label">Status</label>
+                                <div class="form-check form-switch">
+                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch">
+                                    <label class="form-check-label" asp-for="IsActive">
+                            @(Model.IsActive ? "Active Venue" : "Inactive Venue")
+                                    </label>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Inactive venues won't be available for new events
+                                </small>
+                            </div>
+                            -->
+
+                            <div class="col-12">
+                                <hr class="my-4">
+                                <div class="d-flex justify-content-between">
+                                    <a href="@Url.Action("Venues")" class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="card shadow mt-4 border-danger">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 fw-bold">Danger Zone</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Warning
+                        </h6>
+                        <p class="mb-2">These actions are irreversible. Please proceed with caution.</p>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-danger delete-venue-btn"
+                                data-id="@Model.Id" data-name="@Model.Name">
+                            <i class="fas fa-trash me-2"></i>Delete This Venue
+                        </button>
+                        <!--
+                        <button type="button" class="btn btn-outline-warning toggle-status-btn"
+                                data-id="@Model.Id" data-active="@Model.IsActive">
+                            <i class="fas fa-power-off me-2"></i>
+                        @(Model.IsActive ? "Deactivate Venue" : "Activate Venue")
+                        </button>
+                        -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete venue <strong id="deleteVenueName"></strong>?
+                <div class="alert alert-danger mt-2">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    This action cannot be undone!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" asp-action="DeleteVenue">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteVenueId" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function() {
+            // Delete button click
+            $('.delete-venue-btn').click(function() {
+                var venueId = $(this).data('id');
+                var venueName = $(this).data('name');
+
+                $('#deleteVenueId').val(venueId);
+                $('#deleteVenueName').text(venueName);
+                $('#deleteModal').modal('show');
+            });
+
+            // Toggle status button (when you add IsActive)
+            /*
+            $('.toggle-status-btn').click(function() {
+                var venueId = $(this).data('id');
+                var isActive = $(this).data('active') === true;
+                var button = $(this);
+
+                var action = isActive ? 'deactivate' : 'activate';
+                if (confirm(`Are you sure you want to ${action} this venue?`)) {
+                    $.ajax({
+                        url: '@Url.Action("ToggleVenueStatus")',
+                        type: 'POST',
+                        data: {
+                            id: venueId,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                alert('Failed to update venue status.');
+                            }
+                        },
+                        error: function() {
+                            alert('An error occurred.');
+                        }
+                    });
+                }
+            });
+            */
+
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}

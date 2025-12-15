@@ -49,6 +49,8 @@ namespace EventManagementSystem.Models
 
         public List<Booking> Bookings { get; set; } = new();
 
+        public virtual User Organizer { get; set; }
+
     }
 
     public class EventImage
@@ -79,5 +81,12 @@ namespace EventManagementSystem.Models
 
         [Column("location")]
         public string Location { get; set; } = string.Empty;
+
+        [Column("description")]
+        public string? Description { get; set; }
+
+        [Column("capacity")]
+        public int Capacity { get; set; }   // ✅ FIXED
     }
+
 }

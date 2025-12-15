@@ -1,0 +1,388 @@
+﻿@model EventManagementSystem.Models.ViewModels.VenuesViewModel
+
+@{
+    ViewData["Title"] = "Venues Management";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Venues Management</h1>
+        <div>
+            <a href="@Url.Action("CreateVenue")" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add New Venue
+            </a>
+            <a href="@Url.Action("Dashboard")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-primary shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                Total Venues
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">@Model.TotalVenues</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-building fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-success shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                Total Capacity
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @Model.Venues.Sum(v => v.Capacity).ToString("N0")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-info shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                Total Events
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @Model.Venues.Sum(v => v.EventsCount)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-warning shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                Avg Occupancy
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @{
+                                    var avgOccupancy = Model.Venues.Any(v => v.EventsCount > 0) ?
+                                    Model.Venues.Where(v => v.EventsCount > 0).Average(v => v.OccupancyRate) : 0;
+                                }
+                                @avgOccupancy.ToString("F1")%
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 fw-bold text-primary">Filter Venues</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <input type="hidden" name="page" value="1" />
+
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <input type="text" class="form-control" name="search"
+                           value="@Model.Filter.SearchTerm" placeholder="Name, location or description">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Location</label>
+                    <select class="form-select" name="location">
+                        <option value="">All Locations</option>
+                        @foreach (var loc in Model.Locations)
+                        {
+                            <option value="@loc" selected="@(Model.Filter.Location == loc)">@loc</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Capacity Range</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="minCapacity"
+                               value="@Model.Filter.MinCapacity" placeholder="Min" min="1">
+                        <input type="number" class="form-control" name="maxCapacity"
+                               value="@Model.Filter.MaxCapacity" placeholder="Max" min="1">
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Sort By</label>
+                    <select class="form-select" name="sortBy">
+                        <option value="Name" selected="@(Model.Filter.SortBy == "Name")">Name</option>
+                        <option value="Location" selected="@(Model.Filter.SortBy == "Location")">Location</option>
+                        <option value="Capacity" selected="@(Model.Filter.SortBy == "Capacity")">Capacity</option>
+                        <option value="Events" selected="@(Model.Filter.SortBy == "Events")">Events Count</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Order</label>
+                    <select class="form-select" name="sortOrder">
+                        <option value="asc" selected="@(Model.Filter.SortOrder == "asc")">Ascending</option>
+                        <option value="desc" selected="@(Model.Filter.SortOrder == "desc")">Descending</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Page Size</label>
+                    <select class="form-select" name="pageSize" onchange="this.form.submit()">
+                        <option value="10" selected="@(Model.PageSize == 10)">10 per page</option>
+                        <option value="25" selected="@(Model.PageSize == 25)">25 per page</option>
+                        <option value="50" selected="@(Model.PageSize == 50)">50 per page</option>
+                    </select>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter me-2"></i>Apply Filters
+                        </button>
+                        <a href="@Url.Action("Venues")" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Clear Filters
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Venues Table -->
+    <div class="card shadow">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 fw-bold text-primary">All Venues</h6>
+            <div class="text-muted">
+                Showing @((Model.Page - 1) * Model.PageSize + 1) to
+                @Math.Min(Model.Page * Model.PageSize, Model.TotalVenues) of @Model.TotalVenues venues
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Venue Name</th>
+                            <th>Location</th>
+                            <th>Capacity</th>
+                            <th>Events</th>
+                            <th>Revenue</th>
+                            <th>Occupancy</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var venue in Model.Venues)
+                        {
+
+                            <tr>
+                                <td>
+                                    <strong>@venue.Name</strong>
+                                    @if (!string.IsNullOrEmpty(venue.Description))
+                                    {
+                                        <div class="text-muted small mt-1">
+                                            @(venue.Description.Length > 50 ? venue.Description.Substring(0, 50) + "..." : venue.Description)
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@venue.Location</div>
+                                    <small class="text-muted">Added: @venue.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@venue.Capacity.ToString("N0")</div>
+                                    <div class="progress mt-1" style="height: 6px;">
+                                        @{
+                                            var capacityPercent = Math.Min(venue.Capacity / 1000.0 * 100, 100);
+                                        }
+                                        <div class="progress-bar bg-info"
+                                             style="width: @capacityPercent%"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@venue.EventsCount</div>
+                                    <small class="text-muted">events</small>
+                                </td>
+                                <td class="text-success fw-bold">
+                                    LKR @venue.TotalRevenue.ToString("N2")
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                            <div class="progress-bar @(venue.OccupancyRate > 80 ? "bg-success" : venue.OccupancyRate > 50 ? "bg-info" : "bg-warning")"
+                                                 role="progressbar"
+                                                 style="width: @(Math.Min(venue.OccupancyRate, 100))%">
+                                            </div>
+                                        </div>
+                                        <span>@venue.OccupancyRate.ToString("F1")%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="@Url.Action("VenueDetails", new { id = venue.Id })"
+                                           class="btn btn-sm btn-outline-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("EditVenue", new { id = venue.Id })"
+                                           class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger delete-btn"
+                                                data-id="@venue.Id"
+                                                data-name="@venue.Name"
+                                                title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                            <a class="page-link"
+                               href="@Url.Action("Venues", new {
+                                   page = Model.Page - 1,
+                                   pageSize = Model.PageSize,
+                                   search = Model.Filter.SearchTerm,
+                                   location = Model.Filter.Location,
+                                   minCapacity = Model.Filter.MinCapacity,
+                                   maxCapacity = Model.Filter.MaxCapacity,
+                                   isActive = Model.Filter.IsActive,
+                                   sortBy = Model.Filter.SortBy,
+                                   sortOrder = Model.Filter.SortOrder
+                               })">
+                                Previous
+                            </a>
+                        </li>
+
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.Page ? "active" : "")">
+                                <a class="page-link"
+                                   href="@Url.Action("Venues", new {
+                                       page = i,
+                                       pageSize = Model.PageSize,
+                                       search = Model.Filter.SearchTerm,
+                                       location = Model.Filter.Location,
+                                       minCapacity = Model.Filter.MinCapacity,
+                                       maxCapacity = Model.Filter.MaxCapacity,
+                                       isActive = Model.Filter.IsActive,
+                                       sortBy = Model.Filter.SortBy,
+                                       sortOrder = Model.Filter.SortOrder
+                                   })">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link"
+                               href="@Url.Action("Venues", new {
+                                   page = Model.Page + 1,
+                                   pageSize = Model.PageSize,
+                                   search = Model.Filter.SearchTerm,
+                                   location = Model.Filter.Location,
+                                   minCapacity = Model.Filter.MinCapacity,
+                                   maxCapacity = Model.Filter.MaxCapacity,
+                                   isActive = Model.Filter.IsActive,
+                                   sortBy = Model.Filter.SortBy,
+                                   sortOrder = Model.Filter.SortOrder
+                               })">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+
+
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete venue <strong id="deleteVenueName"></strong>?
+                <div class="alert alert-warning mt-2">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    If the venue has events, it cannot be deleted.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" asp-action="DeleteVenue">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteVenueId" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Delete button click
+            $('.delete-btn').click(function() {
+                var venueId = $(this).data('id');
+                var venueName = $(this).data('name');
+
+                $('#deleteVenueId').val(venueId);
+                $('#deleteVenueName').text(venueName);
+                $('#deleteModal').modal('show');
+            });
+
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}

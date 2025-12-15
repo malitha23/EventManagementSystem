@@ -1,0 +1,117 @@
+﻿@model IEnumerable<EventManagementSystem.Models.Booking>
+
+@{
+    ViewData["Title"] = "My Bookings";
+    Layout = "_Layout";
+}
+
+<h2>My Bookings</h2>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>Event</th>
+            <th>Customer</th>
+            <th>Tickets</th>
+            <th>Total Amount</th>
+            <th>Booking Status</th>
+            <th>Payment Status</th>
+            <th>Booked At</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var booking in Model)
+        {
+            <tr>
+                <td>@booking.Id</td>
+                <td>@booking.Event.Title</td>
+                <td>
+                    <a href="javascript:void(0);"
+                       class="text-decoration-underline"
+                       data-bs-toggle="modal"
+                       data-bs-target="#customerModal-@booking.Customer.Id">
+                        @booking.Customer.Name
+                    </a>
+
+                    <!-- Customer Modal -->
+                    <div class="modal fade" id="customerModal-@booking.Customer.Id" tabindex="-1" aria-labelledby="customerModalLabel-@booking.Customer.Id" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="customerModalLabel-@booking.Customer.Id">Customer Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <img src="@(!string.IsNullOrEmpty(booking.Customer.ProfileImage) ? booking.Customer.ProfileImage : "/images/default-profile.png")"
+                                         class="rounded-circle mb-3"
+                                         style="width:100px; height:100px;" alt="Profile Image">
+                                    <h5>@booking.Customer.Name</h5>
+                                    <p>Email: @booking.Customer.Email</p>
+                                    <p>Phone: @booking.Customer.Phone</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    @foreach (var ticket in booking.Tickets)
+                    {
+                        <div>
+                            <a href="javascript:void(0);"
+                               class="text-decoration-underline"
+                               data-bs-toggle="modal"
+                               data-bs-target="#ticketModal-@ticket.Id">
+                                <strong>@ticket.TicketNumber</strong>
+                            </a> - @ticket.Status
+
+                            <!-- Ticket QR Modal --> 
+                            <div class="modal fade" id="ticketModal-@ticket.Id" tabindex="-1" aria-labelledby="ticketModalLabel-@ticket.Id" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="ticketModalLabel-@ticket.Id">Ticket QR Code</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <p><strong>Ticket Number:</strong> @ticket.TicketNumber</p>
+                                            <img src="@ticket.QRCode" alt="QR Code" style="width:200px; height:200px;" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </td>
+
+                <td>@booking.FinalAmount.ToString("C")</td>
+                <td>@booking.BookingStatus</td>
+                <td>@booking.PaymentStatus</td>
+                <td>@booking.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    <form asp-action="UpdateStatus" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@booking.Id" />
+
+                        @if (booking.BookingStatus == "confirmed" && booking.PaymentStatus == "paid")
+                        {
+                            <button type="submit" name="status" value="Canceled" class="btn btn-danger btn-sm">Cancel</button>
+                        }
+                        else if (booking.BookingStatus == "cancelled" && booking.PaymentStatus == "paid")
+                        {
+                            <button type="submit" name="status" value="Confirmed" class="btn btn-success btn-sm">Confirm</button>
+                        }
+                    </form>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>

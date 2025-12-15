@@ -39,6 +39,13 @@ builder.Services.AddHttpContextAccessor();
 // Register custom services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISessionManager, SessionManager>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IVenueService, VenueService>();
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IEventCategoryService, EventCategoryService>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
 
 var app = builder.Build();
 

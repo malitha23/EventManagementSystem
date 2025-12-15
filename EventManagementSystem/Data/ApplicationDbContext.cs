@@ -13,7 +13,7 @@ namespace EventManagementSystem.Data
         }
 
         // Tables
-        public DbSet<User> Users { get; set; }
+        public new DbSet<User> Users { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<EventCategory> EventCategories { get; set; }
         public DbSet<Venue> Venues { get; set; }

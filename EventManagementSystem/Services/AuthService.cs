@@ -2,6 +2,7 @@
 using EventManagementSystem.Data;
 using EventManagementSystem.Models;
 using EventManagementSystem.Utilities;
+using EventManagementSystem.Models.ViewModels;
 
 namespace EventManagementSystem.Services
 {

@@ -1,0 +1,248 @@
+﻿@model EventManagementSystem.Models.ViewModels.VenueCreateViewModel
+
+@{
+    ViewData["Title"] = "Create New Venue";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Create New Venue</h1>
+        <a href="@Url.Action("Venues")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Venues
+        </a>
+    </div>
+
+    <!-- Flash Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Venue Information</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateVenue" method="post" id="createVenueForm">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row g-3">
+                            <!-- Venue Name -->
+                            <div class="col-md-12">
+                                <label asp-for="Name" class="form-label required"></label>
+                                <input asp-for="Name" class="form-control" placeholder="Enter venue name">
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="col-md-12">
+                                <label asp-for="Location" class="form-label required"></label>
+                                <input asp-for="Location" class="form-control" placeholder="Enter venue address/location">
+                                <span asp-validation-for="Location" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-md-12">
+                                <label asp-for="Description" class="form-label"></label>
+                                <textarea asp-for="Description" class="form-control" rows="3"
+                                          placeholder="Enter venue description (optional)"></textarea>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Capacity -->
+                            <div class="col-md-12">
+                                <label asp-for="Capacity" class="form-label required"></label>
+                                <div class="input-group">
+                                    <input asp-for="Capacity" type="number" class="form-control"
+                                           placeholder="Enter maximum capacity">
+                                    <span class="input-group-text">people</span>
+                                </div>
+                                <span asp-validation-for="Capacity" class="text-danger small"></span>
+                                <div class="form-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Maximum number of people the venue can accommodate
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Capacity Preview -->
+                            <div class="col-12">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Capacity Preview</h6>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">Current Capacity</small>
+                                            <span id="capacityPreview" class="fw-bold">100</span>
+                                        </div>
+                                        <div class="progress" style="height: 10px;">
+                                            <div id="capacityBar" class="progress-bar bg-info" role="progressbar" style="width: 10%"></div>
+                                        </div>
+                                        <div class="row mt-2 text-center">
+                                            <div class="col">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-theater-masks me-1"></i>
+                                                    <span id="smallEvent">Small Event</span>
+                                                </small>
+                                            </div>
+                                            <div class="col">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-users me-1"></i>
+                                                    <span id="mediumEvent">Medium Event</span>
+                                                </small>
+                                            </div>
+                                            <div class="col">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-user-friends me-1"></i>
+                                                    <span id="largeEvent">Large Event</span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="col-12">
+                                <hr class="my-4">
+                                <div class="d-flex justify-content-between">
+                                    <a href="@Url.Action("Venues")" class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Create Venue
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Venue Guidelines -->
+            <div class="card shadow mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Venue Guidelines</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary">
+                                <i class="fas fa-check-circle me-2"></i>Best Practices
+                            </h6>
+                            <ul class="small">
+                                <li>Use clear, descriptive venue names</li>
+                                <li>Include full address in location field</li>
+                                <li>Add parking and accessibility information in description</li>
+                                <li>Verify capacity with venue management</li>
+                                <li>Include contact information if available</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Things to Avoid
+                            </h6>
+                            <ul class="small">
+                                <li>Using abbreviations in venue names</li>
+                                <li>Incomplete location information</li>
+                                <li>Inaccurate capacity numbers</li>
+                                <li>Missing facility information</li>
+                                <li>Outdated contact details</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function() {
+            // Capacity preview functionality
+            $('#Capacity').on('input', function() {
+                const capacity = parseInt($(this).val()) || 0;
+                $('#capacityPreview').text(capacity.toLocaleString());
+
+                // Update progress bar
+                let percentage = Math.min((capacity / 10000) * 100, 100);
+                $('#capacityBar').css('width', percentage + '%');
+
+                // Update event type labels
+                if (capacity < 100) {
+                    $('#smallEvent').text('Small Event (50-100)');
+                    $('#mediumEvent').text('Medium Event (100-500)');
+                    $('#largeEvent').text('Large Event (500+)');
+                } else if (capacity < 500) {
+                    $('#smallEvent').text('Small Event ✓');
+                    $('#mediumEvent').text('Medium Event (100-500)');
+                    $('#largeEvent').text('Large Event (500+)');
+                } else if (capacity < 1000) {
+                    $('#smallEvent').text('Small Event ✓');
+                    $('#mediumEvent').text('Medium Event ✓');
+                    $('#largeEvent').text('Large Event (500-1000)');
+                } else {
+                    $('#smallEvent').text('Small Event ✓');
+                    $('#mediumEvent').text('Medium Event ✓');
+                    $('#largeEvent').text('Large Event ✓');
+                }
+            });
+
+            // Trigger initial calculation
+            $('#Capacity').trigger('input');
+
+            // Form validation
+            $('#createVenueForm').submit(function(e) {
+                const capacity = $('#Capacity').val();
+                if (capacity < 1) {
+                    e.preventDefault();
+                    alert('Capacity must be at least 1!');
+                    return false;
+                }
+                return true;
+            });
+
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}
+
+<style>
+    .required:after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+    .progress-bar {
+        transition: width 0.3s ease-in-out;
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+</style>

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using EventManagementSystem.Models;
 using Microsoft.AspNetCore.Http;
+using EventManagementSystem.Models.ViewModels;
 
 namespace EventManagementSystem.Controllers
 {

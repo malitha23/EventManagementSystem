@@ -1,0 +1,155 @@
+﻿
+<div class="modal fade" id="createEventModal" tabindex="-1" aria-labelledby="createEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createEventModalLabel">Create New Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="createEventForm" asp-controller="Event" asp-action="Create" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+
+                    <div class="row">
+                        <!-- Event Title -->
+                        <div class="col-md-6 mb-3">
+                            <label for="Title" class="form-label">Event Title *</label>
+                            <input type="text" id="Title" name="Title" class="form-control" required />
+                        </div>
+
+                        <!-- Category -->
+                        <div class="col-md-6 mb-3">
+                            <label for="CategoryId" class="form-label">Category *</label>
+                            <select id="categorySelect" name="CategoryId" class="form-control" required>
+                                <option value="">-- Select Category --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="Description" class="form-label">Description *</label>
+                            <textarea id="Description" name="Description" class="form-control" rows="3" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Date & Time -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="EventDate" class="form-label">Event Date *</label>
+                            <input type="date" id="EventDate" name="EventDate" class="form-control" required
+                                   min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="StartTime" class="form-label">Start Time *</label>
+                            <input type="time" id="StartTime" name="StartTime" class="form-control" required />
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="EndTime" class="form-label">End Time *</label>
+                            <input type="time" id="EndTime" name="EndTime" class="form-control" required />
+                        </div>
+                    </div>
+
+ 
+                    <!-- Venue & Capacity -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="VenueId" class="form-label">Venue *</label>
+                            <select id="venueSelect" name="VenueId" class="form-control">
+                                <option value="">-- Select Venue --</option>
+                            </select>
+                            <small class="text-muted d-block">
+                                Don't see your venue? <a href="#" id="addVenueLink">Add new</a>
+                            </small>
+
+                            <!-- New venue fields -->
+                            <div id="newVenueFields" class="d-none mt-2">
+
+                                <input type="text"
+                                       id="newVenueName"
+                                       name="NewVenueName"
+                                       class="form-control mb-2"
+                                       placeholder="Enter new venue name" />
+
+                                <input type="text"
+                                       id="newVenueLocation"
+                                       name="NewVenueLocation"
+                                       class="form-control mb-2"
+                                       placeholder="Enter venue location" />
+
+                                <input type="number"
+                                       id="newVenueCapacity"
+                                       name="NewVenueCapacity"
+                                       class="form-control mb-2"
+                                       placeholder="Enter venue capacity"
+                                       min="1" />
+
+                                <textarea id="newVenueDescription"
+                                          name="NewVenueDescription"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="Enter venue description (optional)"></textarea>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="TotalCapacity" class="form-label">Total Capacity *</label>
+                            <input type="number"
+                                   id="TotalCapacity"
+                                   name="TotalCapacity"
+                                   min="1"
+                                   class="form-control"
+                                   required />
+                        </div>
+                    </div>
+
+
+
+                    <!-- Ticket Price & Images -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="TicketPrice" class="form-label">Ticket Price (LKR) *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">LKR</span>
+                                <input type="number" id="TicketPrice" name="TicketPrice" step="0.01" min="0" class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="EventImages" class="form-label">Event Images *</label>
+                            <input type="file" id="EventImages" name="EventImages" class="form-control" multiple accept="image/*" required />
+                            <small class="text-muted">You can upload multiple images</small>
+                        </div>
+                    </div>
+
+                    <!-- Publish Now -->
+                    <div class="row d-none">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="PublishNow" name="PublishNow" value="true">
+                                <label class="form-check-label" for="PublishNow">Publish event immediately</label>
+                            </div>
+                            <small class="text-muted">If unchecked, event will be saved as draft</small>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="createEventBtn">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        Create Event
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<link href="~/css/create-event-modal.css" rel="stylesheet" />
+
+
+

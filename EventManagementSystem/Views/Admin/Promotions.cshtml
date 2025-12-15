@@ -1,0 +1,170 @@
+﻿@model EventManagementSystem.Models.ViewModels.PromotionsViewModel
+
+@{
+    ViewData["Title"] = "Manage Promotions";
+    Layout = "_Layout";
+}
+
+@* Anti-forgery token for AJAX requests *@
+@Html.AntiForgeryToken()
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Promotion Management</h2>
+        <a asp-action="CreatePromotion" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create New Promotion
+        </a>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Promotions">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" placeholder="Search..."
+                               name="search" value="@Model.Filter.SearchTerm" />
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control" name="discountType">
+                            <option value="">All Types</option>
+                            @foreach (var type in Model.DiscountTypes)
+                            {
+                                <option value="@type" selected="@(type == Model.Filter.DiscountType)">
+                                    @type.ToUpper()
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control" name="status">
+                            <option value="all">All Status</option>
+                            @foreach (var status in Model.StatusOptions)
+                            {
+                                <option value="@status" selected="@(status == Model.Filter.Status)">
+                                    @status.ToUpper()
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a asp-action="Promotions" class="btn btn-secondary">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Promotions Table -->
+    <div class="card">
+        <div class="card-body">
+            @if (Model.Promotions.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Discount</th>
+                                <th>Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var promotion in Model.Promotions)
+                            {
+                                <tr>
+                                    <td><strong>@promotion.Code</strong></td>
+                                    <td>
+                                        @if (promotion.DiscountType == "percentage")
+                                        {
+                                            <span>@promotion.DiscountValue%</span>
+                                        }
+                                        else
+                                        {
+                                            <span>$@promotion.DiscountValue</span>
+                                        }
+                                    </td>
+                                    <td><strong>@promotion.DiscountType</strong></td>
+                                    <td>@promotion.StartDate.ToString("MMM dd, yyyy")</td>
+                                    <td>@promotion.EndDate.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <span style="display:inline-block;padding:0.25rem 0.6rem;font-size:0.85rem;font-weight:600;border-radius:0.35rem;color:#fff;background-color:@(promotion.Status.ToLower() == "active" ? "#28a745" : promotion.Status.ToLower() == "inactive" ? "#dc3545" : "#6c757d")">
+                                            @promotion.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="EditPromotion" asp-route-id="@promotion.Id"
+                                               class="btn btn-sm btn-warning">Edit</a>
+                                            <button type="button" class="btn btn-sm btn-danger"
+                                                    onclick="confirmDelete(@promotion.Id, '@promotion.Code')">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.Page ? "active" : "")">
+                                    <a class="page-link"
+                                       asp-action="Promotions"
+                                       asp-route-page="@i"
+                                       asp-route-search="@Model.Filter.SearchTerm"
+                                       asp-route-discountType="@Model.Filter.DiscountType"
+                                       asp-route-status="@Model.Filter.Status">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-tag fa-3x text-muted mb-3"></i>
+                    <h4>No promotions found</h4>
+                    <p class="text-muted">Create your first promotion to get started</p>
+                    <a asp-action="CreatePromotion" class="btn btn-primary">Create Promotion</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, code) {
+            if (confirm(`Are you sure you want to delete promotion "${code}"?`)) {
+                // get the anti-forgery token from the page
+                var token = $('input[name="__RequestVerificationToken"]').first().val();
+
+                $.post('@Url.Action("DeletePromotion", "Admin")',
+                    {
+                        id: id,
+                        __RequestVerificationToken: token
+                    })
+                .done(function() {
+                    location.reload();
+                })
+                .fail(function() {
+                    alert('Failed to delete promotion');
+                });
+            }
+        }
+    </script>
+}

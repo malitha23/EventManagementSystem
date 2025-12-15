@@ -1,0 +1,370 @@
+﻿@model EventManagementSystem.Models.ViewModels.UserCreateViewModel
+
+@{
+    ViewData["Title"] = "Create New User";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Create New User</h1>
+        <a href="@Url.Action("Users")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Users
+        </a>
+    </div>
+
+    <!-- Flash Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">User Information</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateUser" method="post" id="createUserForm">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row g-3">
+                            <!-- Full Name -->
+                            <div class="col-md-6">
+                                <label asp-for="Name" class="form-label required"></label>
+                                <input asp-for="Name" class="form-control" placeholder="Enter full name">
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label required"></label>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="Enter email address">
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-md-6">
+                                <label asp-for="Phone" class="form-label required"></label>
+                                <input asp-for="Phone" class="form-control" placeholder="Enter phone number">
+                                <span asp-validation-for="Phone" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Role -->
+                            <div class="col-md-6">
+                                <label asp-for="Role" class="form-label required"></label>
+                                <select asp-for="Role" class="form-select">
+                                    <option value="">Select Role</option>
+                                    @foreach (var role in ViewBag.Roles)
+                                    {
+                                        <option value="@role">@(role.ToUpperInvariant())</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Role" class="text-danger small"></span>
+                                <div class="form-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Admin: Full system access, Organizer: Can create events, Customer: Can book events
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="col-md-6">
+                                <label asp-for="Password" class="form-label required"></label>
+                                <div class="input-group">
+                                    <input asp-for="Password" type="password" class="form-control"
+                                           id="passwordField" placeholder="Enter password">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                                <div class="form-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-shield-alt me-1"></i>
+                                        Password must be at least 6 characters long
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="col-md-6">
+                                <label asp-for="ConfirmPassword" class="form-label required"></label>
+                                <div class="input-group">
+                                    <input asp-for="ConfirmPassword" type="password" class="form-control"
+                                           id="confirmPasswordField" placeholder="Confirm password">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            id="toggleConfirmPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Password Strength Indicator -->
+                            <div class="col-12">
+                                <div class="progress mb-2" style="height: 5px;" id="passwordStrengthBar">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small id="passwordStrengthText" class="text-muted"></small>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="col-12">
+                                <hr class="my-4">
+                                <div class="d-flex justify-content-between">
+                                    <a href="@Url.Action("Users")" class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Create User
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- User Role Information -->
+            <div class="card shadow mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Role Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="card border-start-danger h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-danger">
+                                        <i class="fas fa-user-shield me-2"></i>Admin
+                                    </h6>
+                                    <p class="card-text small">
+                                        Full system access including:
+                                    </p>
+                                    <ul class="small mb-0">
+                                        <li>User management</li>
+                                        <li>All event management</li>
+                                        <li>System settings</li>
+                                        <li>Financial reports</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-start-info h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">
+                                        <i class="fas fa-user-tie me-2"></i>Organizer
+                                    </h6>
+                                    <p class="card-text small">
+                                        Event management access:
+                                    </p>
+                                    <ul class="small mb-0">
+                                        <li>Create and manage events</li>
+                                        <li>View event bookings</li>
+                                        <li>Manage event tickets</li>
+                                        <li>Event revenue tracking</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-start-success h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-success">
+                                        <i class="fas fa-user me-2"></i>Customer
+                                    </h6>
+                                    <p class="card-text small">
+                                        Standard user access:
+                                    </p>
+                                    <ul class="small mb-0">
+                                        <li>Browse and book events</li>
+                                        <li>View booking history</li>
+                                        <li>Loyalty points</li>
+                                        <li>Profile management</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function() {
+            // Password visibility toggle
+            $('#togglePassword').click(function() {
+                const passwordField = $('#passwordField');
+                const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+                passwordField.attr('type', type);
+                $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+            });
+
+            $('#toggleConfirmPassword').click(function() {
+                const confirmField = $('#confirmPasswordField');
+                const type = confirmField.attr('type') === 'password' ? 'text' : 'password';
+                confirmField.attr('type', type);
+                $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+            });
+
+            // Password strength indicator
+            $('#passwordField').on('input', function() {
+                const password = $(this).val();
+                const strength = calculatePasswordStrength(password);
+                const bar = $('#passwordStrengthBar .progress-bar');
+                const text = $('#passwordStrengthText');
+
+                bar.css('width', strength.percentage + '%');
+                bar.removeClass('bg-danger bg-warning bg-info bg-success');
+                bar.addClass(strength.class);
+
+                text.text(strength.text);
+                text.removeClass('text-danger text-warning text-info text-success');
+                text.addClass(strength.textClass);
+            });
+
+            function calculatePasswordStrength(password) {
+                let score = 0;
+                let feedback = {
+                    percentage: 0,
+                    class: 'bg-danger',
+                    text: 'Very Weak',
+                    textClass: 'text-danger'
+                };
+
+                if (!password) {
+                    return feedback;
+                }
+
+                // Length check
+                if (password.length >= 6) score += 20;
+                if (password.length >= 8) score += 10;
+                if (password.length >= 12) score += 10;
+
+                // Character type checks
+                if (/[A-Z]/.test(password)) score += 10;
+                if (/[a-z]/.test(password)) score += 10;
+                if (/[0-9]/.test(password)) score += 20;
+                if (/[^A-Za-z0-9]/.test(password)) score += 20;
+
+                // Determine strength
+                if (score >= 80) {
+                    feedback = {
+                        percentage: 100,
+                        class: 'bg-success',
+                        text: 'Strong',
+                        textClass: 'text-success'
+                    };
+                } else if (score >= 60) {
+                    feedback = {
+                        percentage: 75,
+                        class: 'bg-info',
+                        text: 'Good',
+                        textClass: 'text-info'
+                    };
+                } else if (score >= 40) {
+                    feedback = {
+                        percentage: 50,
+                        class: 'bg-warning',
+                        text: 'Fair',
+                        textClass: 'text-warning'
+                    };
+                } else if (score >= 20) {
+                    feedback = {
+                        percentage: 25,
+                        class: 'bg-danger',
+                        text: 'Weak',
+                        textClass: 'text-danger'
+                    };
+                } else {
+                    feedback = {
+                        percentage: 10,
+                        class: 'bg-danger',
+                        text: 'Very Weak',
+                        textClass: 'text-danger'
+                    };
+                }
+
+                return feedback;
+            }
+
+            // Form submission validation
+            $('#createUserForm').submit(function(e) {
+                const password = $('#passwordField').val();
+                const confirmPassword = $('#confirmPasswordField').val();
+
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    alert('Passwords do not match!');
+                    return false;
+                }
+
+                if (password.length < 6) {
+                    e.preventDefault();
+                    alert('Password must be at least 6 characters long!');
+                    return false;
+                }
+
+                return true;
+            });
+
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}
+
+<style>
+    .required:after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+    .progress-bar {
+        transition: width 0.3s ease-in-out;
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+        .card.border-start-danger {
+            border-left-color: #dc3545 !important;
+        }
+
+        .card.border-start-info {
+            border-left-color: #17a2b8 !important;
+        }
+
+        .card.border-start-success {
+            border-left-color: #28a745 !important;
+        }
+</style>

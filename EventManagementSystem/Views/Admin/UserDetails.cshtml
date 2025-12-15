@@ -1,0 +1,276 @@
+﻿@model EventManagementSystem.Models.ViewModels.UserViewModel
+
+@{
+    ViewData["Title"] = "User Details";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">User Details</h1>
+        <div>
+            <a href="@Url.Action("EditUser", new { id = Model.Id })" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Edit User
+            </a>
+            <a href="@Url.Action("Users")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Users
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: User Info -->
+        <div class="col-lg-4">
+            <!-- User Profile Card -->
+            <div class="card shadow mb-4">
+                <div class="card-body text-center">
+                    <div class="avatar-xl mb-3">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                             style="width: 80px; height: 80px; margin: 0 auto;">
+                            <i class="fas fa-user fa-3x text-white"></i>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold">@Model.Name</h4>
+                    <div class="mb-3">
+                        <span class="badge @(Model.Role == "admin" ? "bg-danger" : Model.Role == "organizer" ? "bg-info" : "bg-success") fs-6">
+                            @(Model.Role.ToUpperInvariant())
+                        </span>
+                        <span class="badge @(Model.IsActive ? "bg-success" : "bg-danger") ms-2 fs-6">
+                            @(Model.IsActive ? "ACTIVE" : "INACTIVE")
+                        </span>
+                    </div>
+                    <div class="text-muted mb-3">
+                        <i class="fas fa-envelope me-2"></i>@Model.Email<br>
+                        <i class="fas fa-phone me-2 mt-2"></i>@Model.Phone
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        Joined on @Model.CreatedAt.ToString("MMMM dd, yyyy")
+                    </small>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">User Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <i class="fas fa-ticket-alt text-primary me-2"></i>
+                                Total Bookings
+                            </div>
+                            <span class="badge bg-primary rounded-pill">@Model.TotalBookings</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <i class="fas fa-money-bill-wave text-success me-2"></i>
+                                Total Spent
+                            </div>
+                            <span class="fw-bold text-success">LKR @Model.TotalSpent.ToString("N2")</span>
+                        </div>
+                        @if (Model.Role == "organizer")
+                        {
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <i class="fas fa-calendar-alt text-info me-2"></i>
+                                    Events Created
+                                </div>
+                                <span class="badge bg-info rounded-pill">@Model.EventsCreated</span>
+                            </div>
+                        }
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <i class="fas fa-user-clock text-secondary me-2"></i>
+                                Account Age
+                            </div>
+                            <span>@((DateTime.Now - Model.CreatedAt).Days) days</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: User Activity -->
+        <div class="col-lg-8">
+            <!-- Recent Bookings (for customers) -->
+            @if (Model.Role == "customer" && ViewBag.RecentBookings != null)
+            {
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 fw-bold text-primary">Recent Bookings</h6>
+                        @* <a href="@Url.Action("Index", "Bookings", new { userId = Model.Id })" class="btn btn-sm btn-link"> *@
+                        @*     View All *@
+                        @* </a> *@
+                    </div>
+                    <div class="card-body">
+                        @if (ViewBag.RecentBookings.Count > 0)
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Event</th>
+                                            <th>Date</th>
+                                            <th>Tickets</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var booking in ViewBag.RecentBookings)
+                                        {
+                                            <tr>
+                                                <td>@booking.EventTitle</td>
+                                                <td>@booking.CreatedAt.ToString("MMM dd")</td>
+                                                <td>@booking.NumberOfTickets</td>
+                                                <td class="text-success fw-bold">
+                                                    LKR @booking.FinalAmount.ToString("N2")
+                                                </td>
+                                                <td>
+                                                    <span class="badge @(booking.PaymentStatus == "paid" ? "bg-success" : "bg-warning")">
+                                                        @booking.PaymentStatus
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No bookings found</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Events Created (for organizers) -->
+            @if (Model.Role == "organizer" && ViewBag.OrganizerEvents != null)
+            {
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 fw-bold text-primary">Events Created</h6>
+                        <a href="@Url.Action("Index", "Events", new { organizerId = Model.Id })" class="btn btn-sm btn-link">
+                            View All
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        @if (ViewBag.OrganizerEvents.Count > 0)
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Event Title</th>
+                                            <th>Date</th>
+                                            <th>Capacity</th>
+                                            <th>Tickets Sold</th>
+                                            <th>Revenue</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var evt in ViewBag.OrganizerEvents)
+                                        {
+                                            var occupancy = evt.TotalCapacity > 0 ?
+                                            (evt.TicketsSold * 100.0) / evt.TotalCapacity : 0;
+
+                                            <tr>
+                                                <td>@evt.Title</td>
+                                                <td>@evt.EventDate.ToString("MMM dd, yyyy")</td>
+                                                <td>@evt.TotalCapacity</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                            <div class="progress-bar @(occupancy > 80 ? "bg-success" : occupancy > 50 ? "bg-info" : "bg-warning")"
+                                                                 role="progressbar"
+                                                                 style="width: @(occupancy)%">
+                                                            </div>
+                                                        </div>
+                                                        <span>@evt.TicketsSold</span>
+                                                    </div>
+                                                </td>
+                                                <td class="text-success fw-bold">
+                                                    LKR @evt.Revenue.ToString("N2")
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No events created yet</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            
+        
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete user <strong id="deleteUserName"></strong>?
+                <div class="alert alert-warning mt-2">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    This action cannot be undone.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" asp-action="DeleteUser">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteUserId" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Delete button click
+            $('.delete-user-btn').click(function() {
+                var userId = $(this).data('id');
+                var userName = $(this).data('name');
+
+                $('#deleteUserId').val(userId);
+                $('#deleteUserName').text(userName);
+                $('#deleteModal').modal('show');
+            });
+
+            // Form submission handlers
+            $('form[action*="ToggleUserStatus"]').submit(function(e) {
+                e.preventDefault();
+                if (confirm('Are you sure you want to change this user\'s status?')) {
+                    this.submit();
+                }
+            });
+        });
+    </script>
+}

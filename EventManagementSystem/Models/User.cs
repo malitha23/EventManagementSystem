@@ -39,8 +39,12 @@ namespace EventManagementSystem.Models
         [StringLength(255)]
         public string? ProfileImage { get; set; }
 
+        [Column("is_active")]
+        public bool IsActive { get; set; } = true;
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
 
 
     }

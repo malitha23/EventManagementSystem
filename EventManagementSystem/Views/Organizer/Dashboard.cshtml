@@ -1,7 +1,318 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model EventManagementSystem.Models.ViewModels.OrganizerDashboardViewModel
+
+
 @{
+    ViewData["Title"] = "Organizer Dashboard";
+    Layout = "_Layout";
 }
-<h1>Organizer Dashboard</h1>
-<p>Welcome Organizer!</p>
+
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <!-- In the Page Header section, update the button -->
+<div>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createEventModal">
+        <i class="fas fa-plus me-2"></i>New Event
+    </button>
+            <a href="/Account/Profile"  class="btn btn-info">
+                <i class="fas fa-eye me-2"></i>View Events
+            </a>
+</div>
+
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Revenue Card -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-primary shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                Total Revenue
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                LKR @Model.Stats.TotalRevenue.ToString("N2")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Card -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-success shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                Total Bookings
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @Model.Stats.TotalBookings
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-ticket-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets Sold -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-info shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                Tickets Sold
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @Model.Stats.TicketsSold
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Events -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-warning shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                Active Events
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @Model.Stats.ActiveEvents
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Occupancy Rate -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-danger shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-danger text-uppercase mb-1">
+                                Occupancy Rate
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @Model.Stats.AverageOccupancy.ToString("F1")%
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Payments -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-secondary shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-secondary text-uppercase mb-1">
+                                Pending Payments
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                LKR @Model.Stats.PendingPayments.ToString("N2")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Data Grids -->
+    <div class="row g-4">
+        <!-- Revenue Chart and Top Events -->
+        <div class="col-xl-8">
+            <!-- Revenue Chart -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fw-bold text-primary">Revenue Overview</h6>
+                    <select id="chartPeriod" class="form-select form-select-sm w-auto">
+                        <option value="6" selected>Last 6 Months</option>
+                        <option value="3">Last 3 Months</option>
+                        <option value="12">Last Year</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="revenueChart"
+                                data-months='@Json.Serialize(Model.MonthlyRevenues?.Select(m => m.Month) ?? new List<string>())'
+                                data-revenues='@Json.Serialize(Model.MonthlyRevenues?.Select(m => m.Revenue) ?? new List<decimal>())'>
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Performing Events -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Top Performing Events</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Bookings</th>
+                                    <th>Revenue</th>
+                                    <th>Occupancy</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var eventItem in Model.TopEvents)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@eventItem.Title</strong>
+                                        </td>
+                                        <td>@eventItem.BookingsCount</td>
+                                        <td class="text-success fw-bold">
+                                            LKR @eventItem.TotalRevenue.ToString("N2")
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                    <div class="progress-bar bg-success"
+                                                         role="progressbar"
+                                                         style="width: @(Math.Min(eventItem.OccupancyRate, 100))%">
+                                                    </div>
+                                                </div>
+                                                <span>@eventItem.OccupancyRate.ToString("F1")%</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a asp-controller="Event" asp-action="Details"
+                                               asp-route-id="@eventItem.Id"
+                                               class="btn btn-sm btn-outline-primary">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar - Recent Activity -->
+        <div class="col-xl-4">
+            <!-- Upcoming Events -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fw-bold text-primary">Upcoming Events</h6>
+
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        @foreach (var eventItem in Model.UpcomingEvents)
+                        {
+                            <div class="list-group-item px-0">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">@eventItem.Title</h6>
+                                    <small class="text-muted">@eventItem.EventDate.ToString("MMM dd")</small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <div class="text-muted small">
+                                        <i class="fas fa-ticket-alt me-1"></i>
+                                        @eventItem.TicketsSold/@eventItem.TotalCapacity sold
+                                    </div>
+                                    <span class="badge bg-success">
+                                        LKR @eventItem.Revenue.ToString("N0")
+                                    </span>
+                                </div>
+                                <div class="progress mt-2" style="height: 5px;">
+                                    <div class="progress-bar bg-info"
+                                         role="progressbar"
+                                         style="width: @((eventItem.TicketsSold * 100.0) / eventItem.TotalCapacity)%">
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Bookings -->
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fw-bold text-primary">Recent Bookings</h6>
+                    <a asp-controller="Bookings" asp-action="Index" class="btn btn-sm btn-link">
+                        View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        @foreach (var booking in Model.RecentBookings)
+                        {
+                            <div class="list-group-item px-0">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1">@booking.CustomerName</h6>
+                                        <small class="text-muted">@booking.EventTitle</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold">LKR @booking.FinalAmount.ToString("N2")</div>
+                                        <small class="@(booking.PaymentStatus == "paid" ? "text-success" : "text-warning")">
+                                            @booking.PaymentStatus.ToUpper()
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        @booking.CreatedAt.ToString("MMM dd, HH:mm")
+                                    </small>
+                                    <span class="badge bg-info">
+                                        @booking.NumberOfTickets ticket(s)
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_CreateEventModal", Model.NewEvent)
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/orgenizer-dashboard.css" />
+}

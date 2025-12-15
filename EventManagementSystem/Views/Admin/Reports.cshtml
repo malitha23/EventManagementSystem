@@ -1,0 +1,677 @@
+﻿@using System.Globalization
+@model EventManagementSystem.Models.ViewModels.ReportsViewModel
+
+@{
+    ViewData["Title"] = "Analytics & Reports";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Analytics & Reports</h1>
+        <a href="@Url.Action("Dashboard")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Dashboard
+        </a>
+    </div>
+
+    <!-- Report Filter Form -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 fw-bold text-primary">Generate Report</h6>
+        </div>
+        <div class="card-body">
+            <form method="post" id="reportForm">
+                @Html.AntiForgeryToken()
+
+                <div class="row g-3">
+                    <!-- Report Type -->
+                    <div class="col-md-3">
+                        <label class="form-label required">Report Type</label>
+                        <select asp-for="Filter.ReportType" class="form-select" required>
+                            <option value="">Select Report Type</option>
+                            @foreach (var type in Model.ReportTypes)
+                            {
+                                <option value="@type">@CultureInfo.CurrentCulture.TextInfo.ToTitleCase(type)</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Filter.ReportType" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input asp-for="Filter.StartDate" type="date" class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input asp-for="Filter.EndDate" type="date" class="form-control">
+                    </div>
+
+                    <!-- Group By -->
+                    <div class="col-md-3">
+                        <label class="form-label">Group By</label>
+                        <select asp-for="Filter.GroupBy" class="form-select">
+                            <option value="day">Daily</option>
+                            <option value="week">Weekly</option>
+                            <option value="month" selected>Monthly</option>
+                        </select>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="col-md-3">
+                        <label class="form-label">Category</label>
+                        <select asp-for="Filter.Category" class="form-select">
+                            <option value="">All Categories</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category">@category</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Organizer Filter -->
+                    <div class="col-md-3">
+                        <label class="form-label">Organizer</label>
+                        <select asp-for="Filter.Organizer" class="form-select">
+                            <option value="">All Organizers</option>
+                            @foreach (var organizer in Model.Organizers)
+                            {
+                                <option value="@organizer">@organizer</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="col-md-3">
+                        <label class="form-label">Status</label>
+                        <select asp-for="Filter.Status" class="form-select">
+                            <option value="">All Status</option>
+                            @foreach (var status in Model.StatusOptions)
+                            {
+                                <option value="@status">@status</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Export Format -->
+                    <div class="col-md-3">
+                        <label class="form-label">Export Format</label>
+                        <select asp-for="Filter.ExportFormat" class="form-select">
+                            <option value="html">HTML (View)</option>
+                            <option value="csv">CSV (Download)</option>
+                            <option value="pdf">PDF (Download)</option>
+                        </select>
+                    </div>
+
+                    <!-- Include Details -->
+                    <div class="col-md-12">
+                        <div class="form-check">
+                            <input asp-for="Filter.IncludeDetails" class="form-check-input" type="checkbox">
+                            <label asp-for="Filter.IncludeDetails" class="form-check-label">
+                                Include Detailed Data
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="col-md-12">
+                        <hr class="my-3">
+                        <div class="d-flex gap-2">
+                            <!-- Generate Report -->
+                            <button type="submit" formaction="@Url.Action("Reports")" class="btn btn-primary">
+                                <i class="fas fa-chart-bar me-2"></i>Generate Report
+                            </button>
+
+                            <!-- Export Report -->
+                            <button type="submit" formaction="@Url.Action("ExportReport")" class="btn btn-success">
+                                <i class="fas fa-download me-2"></i>Export Report
+                            </button>
+
+                            <a href="@Url.Action("Reports")" class="btn btn-secondary">
+                                <i class="fas fa-redo me-2"></i>Reset
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Report Results -->
+    @if (Model.Results != null && !string.IsNullOrEmpty(Model.Results.Title))
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-primary">@Model.Results.Title</h6>
+                <div class="text-muted small">
+                    Generated: @Model.Results.GeneratedAt.ToString("MMM dd, yyyy HH:mm")
+                    @if (Model.Filter.StartDate.HasValue && Model.Filter.EndDate.HasValue)
+                    {
+                        <span> | Period: @Model.Filter.StartDate.Value.ToString("MMM dd, yyyy") - @Model.Filter.EndDate.Value.ToString("MMM dd, yyyy")</span>
+                    }
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Summary Statistics -->
+                <div class="row g-4 mb-4">
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-start-primary shadow h-100">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                            Total Revenue
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">
+                                            LKR @Model.Results.Summary.TotalRevenue.ToString("N2")
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-start-success shadow h-100">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                            Total Events
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">
+                                            @Model.Results.Summary.TotalEvents
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-start-info shadow h-100">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                            Total Bookings
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">
+                                            @Model.Results.Summary.TotalBookings
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-ticket-alt fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-start-warning shadow h-100">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                            Avg Occupancy
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">
+                                            @Model.Results.Summary.AverageOccupancyRate.ToString("F1")%
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                @if (Model.Results.DataPoints.Any())
+                {
+                    <div class="row g-4 mb-4">
+                        <div class="col-12">
+                            <div class="card shadow">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 fw-bold text-primary">@Model.Results.Title - Overview</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="height: 400px;">
+                                        <canvas id="reportChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Detailed Data Table -->
+                @if (Model.Results.DataPoints.Any())
+                {
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 fw-bold text-primary">Detailed Data</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Period</th>
+                                            <th>Revenue</th>
+                                            <th>Events</th>
+                                            <th>Bookings</th>
+                                            <th>Tickets</th>
+                                            @if (Model.Filter.ReportType == "revenue")
+                                            {
+                                                <th>Percentage</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var point in Model.Results.DataPoints)
+                                        {
+                                            <tr>
+                                                <td>@point.Label</td>
+                                                <td class="text-success fw-bold">
+                                                    LKR @point.Revenue.ToString("N2")
+                                                </td>
+                                                <td>@point.Events</td>
+                                                <td>@point.Bookings</td>
+                                                <td>@point.Tickets</td>
+                                                @if (Model.Filter.ReportType == "revenue")
+                                                {
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                                <div class="progress-bar bg-info"
+                                                                     role="progressbar"
+                                                                     style="width: @(Math.Min(point.Percentage, 100))%">
+                                                                </div>
+                                                            </div>
+                                                            <span>@point.Percentage.ToString("F1")%</span>
+                                                        </div>
+                                                    </td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Additional Details -->
+                @if (Model.Results.Details.Any() && Model.Filter.IncludeDetails)
+                {
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 fw-bold text-primary">Detailed Breakdown</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Category</th>
+                                            <th>Amount</th>
+                                            <th>Quantity</th>
+                                            <th>Status</th>
+                                            @if (Model.Filter.ReportType == "users" || Model.Filter.ReportType == "bookings")
+                                            {
+                                                <th>Date</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var detail in Model.Results.Details)
+                                        {
+                                            <tr>
+                                                <td>@detail.Name</td>
+                                                <td>
+                                                    <span class="badge bg-secondary">@detail.Category</span>
+                                                </td>
+                                                <td class="text-success fw-bold">
+                                                    @if (detail.Amount > 0)
+                                                    {
+                                                        <text>LKR @detail.Amount.ToString("N2")</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <text>-</text>
+                                                    }
+                                                </td>
+                                                <td>@detail.Quantity</td>
+                                                <td>
+                                                    <span class="badge @(detail.Status.Contains("%") ? "bg-info" : "bg-primary")">
+                                                        @detail.Status
+                                                    </span>
+                                                </td>
+                                                @if (Model.Filter.ReportType == "users" || Model.Filter.ReportType == "bookings")
+                                                {
+                                                    <td>@detail.Date.ToString("MMM dd, yyyy")</td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Welcome/Instructions Card -->
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 fw-bold text-primary">Welcome to Analytics & Reports</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="card border-start-primary h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <i class="fas fa-money-bill-wave me-2"></i>Revenue Reports
+                                </h5>
+                                <p class="card-text">
+                                    Analyze revenue trends, category performance, and organizer contributions.
+                                </p>
+                                <ul class="small">
+                                    <li>Monthly revenue trends</li>
+                                    <li>Category-wise analysis</li>
+                                    <li>Organizer performance</li>
+                                    <li>Revenue forecasts</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card border-start-success h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-success">
+                                    <i class="fas fa-ticket-alt me-2"></i>Booking Reports
+                                </h5>
+                                <p class="card-text">
+                                    Track booking patterns, payment methods, and customer behavior.
+                                </p>
+                                <ul class="small">
+                                    <li>Booking trends over time</li>
+                                    <li>Payment method analysis</li>
+                                    <li>Customer booking patterns</li>
+                                    <li>Conversion rates</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card border-start-info h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-info">
+                                    <i class="fas fa-users me-2"></i>User Reports
+                                </h5>
+                                <p class="card-text">
+                                    Monitor user growth, activity levels, and engagement metrics.
+                                </p>
+                                <ul class="small">
+                                    <li>User growth trends</li>
+                                    <li>Activity monitoring</li>
+                                    <li>Role distribution</li>
+                                    <li>Engagement metrics</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <p class="text-muted">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Select a report type above and click "Generate Report" to begin
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Set default dates
+            setDefaultDates();
+
+            // Report type change handler
+            $('#Filter_ReportType').change(function() {
+                updateFormForReportType($(this).val());
+            });
+
+            // Initialize form based on current report type
+            updateFormForReportType($('#Filter_ReportType').val());
+
+            // Initialize chart if data exists
+        @if (Model.Results?.DataPoints?.Any() == true)
+        {
+            <text>
+                    initializeChart();
+            </text>
+        }
+        });
+
+        function setDefaultDates() {
+            const today = new Date();
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(today.getMonth() - 1);
+
+            // Format dates as yyyy-mm-dd
+            const formatDate = (date) => date.toISOString().split('T')[0];
+
+            if (!$('#Filter_StartDate').val()) {
+                $('#Filter_StartDate').val(formatDate(oneMonthAgo));
+            }
+            if (!$('#Filter_EndDate').val()) {
+                $('#Filter_EndDate').val(formatDate(today));
+            }
+        }
+
+        function updateFormForReportType(reportType) {
+            // Hide/show filters based on report type
+            const $categoryFilter = $('#Filter_Category').closest('.col-md-3');
+            const $organizerFilter = $('#Filter_Organizer').closest('.col-md-3');
+            const $statusFilter = $('#Filter_Status').closest('.col-md-3');
+            const $groupByFilter = $('#Filter_GroupBy').closest('.col-md-3');
+
+            switch(reportType) {
+                case 'revenue':
+                case 'events':
+                    $categoryFilter.show();
+                    $organizerFilter.show();
+                    $statusFilter.show();
+                    $groupByFilter.show();
+                    break;
+                case 'bookings':
+                    $categoryFilter.hide();
+                    $organizerFilter.hide();
+                    $statusFilter.show();
+                    $groupByFilter.show();
+                    break;
+                case 'users':
+                    $categoryFilter.hide();
+                    $organizerFilter.hide();
+                    $statusFilter.hide();
+                    $groupByFilter.show();
+                    break;
+                case 'summary':
+                    $categoryFilter.hide();
+                    $organizerFilter.hide();
+                    $statusFilter.hide();
+                    $groupByFilter.hide();
+                    break;
+                default:
+                    $categoryFilter.show();
+                    $organizerFilter.show();
+                    $statusFilter.show();
+                    $groupByFilter.show();
+            }
+        }
+
+        function initializeChart() {
+            const chartData = @Html.Raw(Json.Serialize(Model.Results.DataPoints));
+            const reportType = '@Model.Filter.ReportType';
+
+            if (!chartData || chartData.length === 0) return;
+
+            const ctx = document.getElementById('reportChart').getContext('2d');
+            const labels = chartData.map(item => item.label);
+
+            let datasets = [];
+            let yAxisLabel = '';
+
+            switch(reportType) {
+                case 'revenue':
+                    datasets = [{
+                        label: 'Revenue (LKR)',
+                        data: chartData.map(item => item.revenue),
+                        borderColor: '#4e73df',
+                        backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }];
+                    yAxisLabel = 'Revenue (LKR)';
+                    break;
+
+                case 'bookings':
+                    datasets = [
+                        {
+                            label: 'Bookings',
+                            data: chartData.map(item => item.bookings),
+                            borderColor: '#1cc88a',
+                            backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Tickets',
+                            data: chartData.map(item => item.tickets),
+                            borderColor: '#36b9cc',
+                            backgroundColor: 'rgba(54, 185, 204, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ];
+                    yAxisLabel = 'Count';
+                    break;
+
+                case 'events':
+                    datasets = [{
+                        label: 'Events',
+                        data: chartData.map(item => item.events),
+                        borderColor: '#f6c23e',
+                        backgroundColor: 'rgba(246, 194, 62, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }];
+                    yAxisLabel = 'Events Count';
+                    break;
+
+                case 'users':
+                    datasets = [{
+                        label: 'New Users',
+                        data: chartData.map(item => item.users),
+                        borderColor: '#e74a3b',
+                        backgroundColor: 'rgba(231, 74, 59, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }];
+                    yAxisLabel = 'Users Count';
+                    break;
+
+                default:
+                    datasets = [{
+                        label: 'Value',
+                        data: chartData.map(item => item.revenue || item.bookings || item.events || item.users),
+                        borderColor: '#4e73df',
+                        backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }];
+                    yAxisLabel = 'Value';
+            }
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: yAxisLabel
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    if (reportType === 'revenue') {
+                                        return 'LKR ' + value.toLocaleString();
+                                    }
+                                    return value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        if (reportType === 'revenue') {
+                                            label += 'LKR ' + context.parsed.y.toLocaleString();
+                                        } else {
+                                            label += context.parsed.y.toLocaleString();
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+    <script>
+        document.getElementById('exportForm')?.addEventListener('submit', function () {
+            const exportFormat = document.querySelector('[name="Filter.ExportFormat"]').value;
+            document.querySelector('#exportForm input[name="Filter.ExportFormat"]').value = exportFormat;
+        });
+    </script>
+
+}

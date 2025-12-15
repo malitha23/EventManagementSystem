@@ -22,6 +22,7 @@ namespace EventManagementSystem.Controllers
             _sessionManager = sessionManager;
         }
 
+
         // ==============================
         //  SHOW BOOKING PAGE
         // ==============================

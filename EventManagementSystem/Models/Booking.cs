@@ -9,6 +9,7 @@ namespace EventManagementSystem.Models
         public int Id { get; set; }
 
         public int CustomerId { get; set; }
+
         public User? Customer { get; set; }
 
         public int EventId { get; set; }

@@ -1,0 +1,199 @@
+﻿@model EventManagementSystem.Models.ViewModels.UserEditViewModel
+
+@{
+    ViewData["Title"] = "Edit User";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Edit User</h1>
+        <a href="@Url.Action("Users")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Users
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Edit User Information</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditUser" method="post" id="editUserForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Name" class="form-label required"></label>
+                                <input asp-for="Name" class="form-control">
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label required"></label>
+                                <input asp-for="Email" type="email" class="form-control">
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Phone" class="form-label required"></label>
+                                <input asp-for="Phone" class="form-control">
+                                <span asp-validation-for="Phone" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Role" class="form-label required"></label>
+                                <select asp-for="Role" class="form-select">
+                                    <option value="">Select Role</option>
+                                    @foreach (var role in ViewBag.Roles)
+                                    {
+                                        <option value="@role">@(role.ToUpperInvariant())</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Role" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Account Status</label>
+                                <div class="form-check form-switch">
+                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch">
+                                    <label class="form-check-label" asp-for="IsActive">
+                                        @(Model.IsActive ? "Active Account" : "Inactive Account")
+                                    </label>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Inactive users cannot log in to the system
+                                </small>
+                            </div>
+
+                            <div class="col-12">
+                                <hr>
+                                <h6 class="fw-bold text-primary mb-3">Change Password (Optional)</h6>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="changePasswordToggle">
+                                    <label class="form-check-label fw-semibold" for="changePasswordToggle">
+                                        Change Password
+                                    </label>
+                                </div>
+                                <small class="text-muted">
+                                    Leave unchecked to keep the current password
+                                </small>
+                            </div>
+                            <div class="row g-3" id="passwordFields" style="display:none;">
+                                <div class="col-md-6">
+                                    <label asp-for="NewPassword" class="form-label"></label>
+                                    <div class="input-group">
+                                        <input asp-for="NewPassword" type="password" class="form-control" disabled>
+                                        <button class="btn btn-outline-secondary" type="button"
+                                                onclick="togglePasswordVisibility('NewPassword')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <span asp-validation-for="NewPassword" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                                    <div class="input-group">
+                                        <input asp-for="ConfirmPassword" type="password" class="form-control" disabled>
+                                        <button class="btn btn-outline-secondary" type="button"
+                                                onclick="togglePasswordVisibility('ConfirmPassword')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+
+                            <div class="col-12">
+                                <hr class="my-4">
+                                <div class="d-flex justify-content-between">
+                                    <a href="@Url.Action("Users")" class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $('#changePasswordToggle').change(function () {
+            if ($(this).is(':checked')) {
+                $('#passwordFields').slideDown();
+                $('#NewPassword, #ConfirmPassword').prop('disabled', false);
+            } else {
+                $('#passwordFields').slideUp();
+                $('#NewPassword, #ConfirmPassword')
+                    .prop('disabled', true)
+                    .val('');
+            }
+        });
+    </script>
+
+
+    <script>
+        function togglePasswordVisibility(fieldId) {
+            const field = $('#' + fieldId);
+            const button = field.next('button');
+            const icon = button.find('i');
+
+            if (field.attr('type') === 'password') {
+                field.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                field.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        }
+
+        $(document).ready(function() {
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+
+            // Toggle switch text
+            $('#IsActive').change(function() {
+                const label = $(this).next('.form-check-label');
+                if ($(this).is(':checked')) {
+                    label.text('Active Account');
+                } else {
+                    label.text('Inactive Account');
+                }
+            });
+        });
+    </script>
+}

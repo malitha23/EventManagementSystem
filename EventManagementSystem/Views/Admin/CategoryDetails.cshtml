@@ -1,0 +1,207 @@
+﻿@model EventManagementSystem.Models.ViewModels.CategoryDetailsViewModel
+
+@{
+    ViewData["Title"] = "Category Details";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Category Details</h1>
+        <div>
+            <a href="@Url.Action("EditCategory", new { id = Model.Category.Id })" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Edit Category
+            </a>
+            <a href="@Url.Action("EventCategories")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Categories
+            </a>
+        </div>
+    </div>
+
+    <!-- Category Information -->
+    <div class="row">
+        <!-- Left Column: Category Details -->
+        <div class="col-lg-4">
+            <!-- Category Profile Card -->
+            <div class="card shadow mb-4">
+                <div class="card-body text-center">
+                    <div class="avatar-xl mb-3">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                             style="width: 80px; height: 80px; margin: 0 auto;">
+                            <i class="fas fa-tag fa-3x text-white"></i>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold">@Model.Category.Name</h4>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Category ID: @Model.Category.Id
+                    </small>
+                </div>
+            </div>
+
+            <!-- Statistics Card -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Category Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                Total Events
+                            </div>
+                            <span class="badge bg-primary rounded-pill">@Model.Stats.TotalEvents</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <i class="fas fa-ticket-alt text-success me-2"></i>
+                                Total Bookings
+                            </div>
+                            <span class="badge bg-success rounded-pill">@Model.Stats.TotalBookings</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <i class="fas fa-users text-info me-2"></i>
+                                Tickets Sold
+                            </div>
+                            <span class="badge bg-info rounded-pill">@Model.Stats.TotalTicketsSold.ToString("N0")</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <i class="fas fa-money-bill-wave text-success me-2"></i>
+                                Total Revenue
+                            </div>
+                            <span class="fw-bold text-success">LKR @Model.Stats.TotalRevenue.ToString("N2")</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <i class="fas fa-chart-line text-warning me-2"></i>
+                                Avg Occupancy
+                            </div>
+                            <span class="fw-bold text-warning">@Model.Stats.AverageOccupancy.ToString("F1")%</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <i class="fas fa-calendar-check text-success me-2"></i>
+                                Upcoming Events
+                            </div>
+                            <span class="badge bg-success rounded-pill">@Model.Stats.UpcomingEventsCount</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <i class="fas fa-calendar-times text-secondary me-2"></i>
+                                Past Events
+                            </div>
+                            <span class="badge bg-secondary rounded-pill">@Model.Stats.PastEventsCount</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Events -->
+        <div class="col-lg-8">
+            <!-- Upcoming Events -->
+            @if (Model.UpcomingEvents.Any())
+            {
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 fw-bold text-primary">Upcoming Events</h6>
+                        <span class="badge bg-primary">@Model.UpcomingEvents.Count events</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Date</th>
+                                        <th>Organizer</th>
+                                        <th>Venue</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var evt in Model.UpcomingEvents)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a href="/Event/Details/@evt.Id" class="text-decoration-none">
+                                                    <strong>@evt.Title</strong>
+                                                </a>
+                                            </td>
+                                            <td>@evt.EventDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@evt.OrganizerName</td>
+                                            <td>@evt.VenueName</td>
+                                            <td>
+                                                <span class="badge bg-primary">@evt.Status</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Past Events -->
+            @if (Model.PastEvents.Any())
+            {
+                <div class="card shadow">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 fw-bold text-primary">Past Events</h6>
+                        <span class="badge bg-secondary">@Model.PastEvents.Count events</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Date</th>
+                                        <th>Organizer</th>
+                                        <th>Venue</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var evt in Model.PastEvents)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a href="/Event/Details/@evt.Id" class="text-decoration-none">
+                                                    <strong>@evt.Title</strong>
+                                                </a>
+                                            </td>
+                                            <td>@evt.EventDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@evt.OrganizerName</td>
+                                            <td>@evt.VenueName</td>
+                                            <td>
+                                                <span class="badge bg-secondary">@evt.Status</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (!Model.UpcomingEvents.Any() && !Model.PastEvents.Any())
+            {
+                <div class="card shadow">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Events Found</h5>
+                        <p class="text-muted">This category doesn't have any events yet.</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

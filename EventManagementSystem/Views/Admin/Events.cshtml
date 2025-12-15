@@ -1,0 +1,497 @@
+﻿@model EventManagementSystem.Models.ViewModels.AdminEventsViewModel
+
+@{
+    ViewData["Title"] = "Events Management";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Events Management</h1>
+        <div>
+            <a href="@Url.Action("Dashboard")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-primary shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                Total Events
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">@Model.TotalEvents</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-success shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                Total Revenue
+                            </div>
+                            @{
+                                var totalRevenue = Model.Events.Sum(e => e.Revenue);
+                            }
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                LKR @totalRevenue.ToString("N2")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-info shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                Tickets Sold
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @Model.Events.Sum(e => e.TicketsSold)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-ticket-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-warning shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                Avg Occupancy
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @{
+                                    var avgOccupancy = Model.Events.Any() ?
+                                    Model.Events.Average(e => e.OccupancyRate) : 0;
+                                }
+                                @avgOccupancy.ToString("F1")%
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 fw-bold text-primary">Filter Events</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <input type="hidden" name="page" value="1" />
+
+                <div class="col-md-3">
+                    <label class="form-label">Search</label>
+                    <input type="text" class="form-control" name="search"
+                           value="@Model.Filter.SearchTerm" placeholder="Title or description">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" name="status">
+                        <option value="">All Status</option>
+                        <option value="upcoming" selected="@(Model.Filter.Status == "upcoming")">Upcoming</option>
+                        <option value="ongoing" selected="@(Model.Filter.Status == "ongoing")">Ongoing</option>
+                        <option value="completed" selected="@(Model.Filter.Status == "completed")">Completed</option>
+                        <option value="cancelled" selected="@(Model.Filter.Status == "cancelled")">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" name="category">
+                        <option value="">All Categories</option>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <option value="@category" selected="@(Model.Filter.Category == category)">
+                                @category
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Organizer</label>
+                    <select class="form-select" name="organizer">
+                        <option value="">All Organizers</option>
+                        @foreach (var organizer in Model.Organizers)
+                        {
+                            <option value="@organizer" selected="@(Model.Filter.Organizer == organizer)">
+                                @organizer
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Date Range</label>
+                    <div class="input-group">
+                        <input type="date" class="form-control" name="fromDate"
+                               value="@Model.Filter.FromDate?.ToString("yyyy-MM-dd")">
+                        <span class="input-group-text">to</span>
+                        <input type="date" class="form-control" name="toDate"
+                               value="@Model.Filter.ToDate?.ToString("yyyy-MM-dd")">
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Price Range</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="minPrice"
+                               value="@Model.Filter.MinPrice" placeholder="Min" step="0.01">
+                        <input type="number" class="form-control" name="maxPrice"
+                               value="@Model.Filter.MaxPrice" placeholder="Max" step="0.01">
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Sort By</label>
+                    <select class="form-select" name="sortBy">
+                        <option value="EventDate" selected="@(Model.Filter.SortBy == "EventDate")">Date</option>
+                        <option value="Title" selected="@(Model.Filter.SortBy == "Title")">Title</option>
+                        <option value="Price" selected="@(Model.Filter.SortBy == "Price")">Price</option>
+                        <option value="Revenue" selected="@(Model.Filter.SortBy == "Revenue")">Revenue</option>
+                        <option value="Tickets" selected="@(Model.Filter.SortBy == "Tickets")">Tickets</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Order</label>
+                    <select class="form-select" name="sortOrder">
+                        <option value="asc" selected="@(Model.Filter.SortOrder == "asc")">Ascending</option>
+                        <option value="desc" selected="@(Model.Filter.SortOrder == "desc")">Descending</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Page Size</label>
+                    <select class="form-select" name="pageSize" onchange="this.form.submit()">
+                        <option value="10" selected="@(Model.PageSize == 10)">10 per page</option>
+                        <option value="25" selected="@(Model.PageSize == 25)">25 per page</option>
+                        <option value="50" selected="@(Model.PageSize == 50)">50 per page</option>
+                        <option value="100" selected="@(Model.PageSize == 100)">100 per page</option>
+                    </select>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter me-2"></i>Apply Filters
+                        </button>
+                        <a href="@Url.Action("Events")" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Clear Filters
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Events Table -->
+    <div class="card shadow">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 fw-bold text-primary">All Events</h6>
+            <div class="text-muted">
+                Showing @((Model.Page - 1) * Model.PageSize + 1) to
+                @Math.Min(Model.Page * Model.PageSize, Model.TotalEvents) of @Model.TotalEvents events
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Date & Time</th>
+                            <th>Organizer</th>
+                            <th>Price</th>
+                            <th>Tickets</th>
+                            <th>Revenue</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var evt in Model.Events)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3" style="width: 60px; height: 60px;">
+                                            <img src="@evt.MainImageUrl"
+                                                 class="img-fluid rounded"
+                                                 alt="@evt.Title"
+                                                 style="width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                        <div>
+                                            <strong class="d-block">@evt.Title</strong>
+                                            <small class="text-muted">@evt.CategoryName</small>
+                                            <div class="mt-1">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-map-marker-alt me-1"></i>@evt.VenueName
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@evt.EventDate.ToString("MMM dd, yyyy")</div>
+                                    <small class="text-muted">
+                                        @evt.StartTime.ToString(@"hh\:mm") - @evt.EndTime.ToString(@"hh\:mm")
+                                    </small>
+                                </td>
+                                <td>
+                                    <div>@evt.OrganizerName</div>
+                                    <small class="text-muted">@evt.OrganizerEmail</small>
+                                </td>
+                                <td class="fw-bold">
+                                    LKR @evt.TicketPrice.ToString("N2")
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                            <div class="progress-bar @(evt.OccupancyRate > 80 ? "bg-success" : evt.OccupancyRate > 50 ? "bg-info" : "bg-warning")"
+                                                 role="progressbar"
+                                                 style="width: @(Math.Min(evt.OccupancyRate, 100))%">
+                                            </div>
+                                        </div>
+                                        <div class="text-nowrap">
+                                            <small>@evt.TicketsSold/@evt.TotalCapacity</small>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">@evt.OccupancyRate.ToString("F1")% full</small>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-success">
+                                        LKR @evt.Revenue.ToString("N2")
+                                    </div>
+                                    <small class="text-muted">@evt.BookingCount bookings</small>
+                                </td>
+                                <td>
+                                    @{
+                                        var statusBadgeClass = evt.Status switch
+                                        {
+                                            "upcoming" => "bg-primary",
+                                            "ongoing" => "bg-success",
+                                            "completed" => "bg-secondary",
+                                            "cancelled" => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @statusBadgeClass">
+                                        @evt.Status.ToUpper()
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        
+                                        <a href="/Event/Details/@evt.Id"
+                                           class="btn btn-sm btn-outline-primary" title="View Public Page">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-warning toggle-status-btn"
+                                                data-id="@evt.Id"
+                                                data-status="@evt.Status"
+                                                title="Toggle Status">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger delete-btn"
+                                                data-id="@evt.Id"
+                                                data-title="@evt.Title"
+                                                title="Delete Event">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                            <a class="page-link"
+                               href="@Url.Action("Events", new {
+                                   page = Model.Page - 1,
+                                   pageSize = Model.PageSize,
+                                   search = Model.Filter.SearchTerm,
+                                   status = Model.Filter.Status,
+                                   category = Model.Filter.Category,
+                                   organizer = Model.Filter.Organizer,
+                                   fromDate = Model.Filter.FromDate?.ToString("yyyy-MM-dd"),
+                                   toDate = Model.Filter.ToDate?.ToString("yyyy-MM-dd"),
+                                   minPrice = Model.Filter.MinPrice,
+                                   maxPrice = Model.Filter.MaxPrice,
+                                   sortBy = Model.Filter.SortBy,
+                                   sortOrder = Model.Filter.SortOrder
+                               })">
+                                Previous
+                            </a>
+                        </li>
+
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.Page ? "active" : "")">
+                                <a class="page-link"
+                                   href="@Url.Action("Events", new {
+                                       page = i,
+                                       pageSize = Model.PageSize,
+                                       search = Model.Filter.SearchTerm,
+                                       status = Model.Filter.Status,
+                                       category = Model.Filter.Category,
+                                       organizer = Model.Filter.Organizer,
+                                       fromDate = Model.Filter.FromDate?.ToString("yyyy-MM-dd"),
+                                       toDate = Model.Filter.ToDate?.ToString("yyyy-MM-dd"),
+                                       minPrice = Model.Filter.MinPrice,
+                                       maxPrice = Model.Filter.MaxPrice,
+                                       sortBy = Model.Filter.SortBy,
+                                       sortOrder = Model.Filter.SortOrder
+                                   })">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link"
+                               href="@Url.Action("Events", new {
+                                   page = Model.Page + 1,
+                                   pageSize = Model.PageSize,
+                                   search = Model.Filter.SearchTerm,
+                                   status = Model.Filter.Status,
+                                   category = Model.Filter.Category,
+                                   organizer = Model.Filter.Organizer,
+                                   fromDate = Model.Filter.FromDate?.ToString("yyyy-MM-dd"),
+                                   toDate = Model.Filter.ToDate?.ToString("yyyy-MM-dd"),
+                                   minPrice = Model.Filter.MinPrice,
+                                   maxPrice = Model.Filter.MaxPrice,
+                                   sortBy = Model.Filter.SortBy,
+                                   sortOrder = Model.Filter.SortOrder
+                               })">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete event <strong id="deleteEventTitle"></strong>?
+                <div class="alert alert-warning mt-2">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    If the event has bookings, it will be marked as cancelled instead of deleted.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" asp-action="DeleteEvent">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteEventId" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Delete button click
+            $('.delete-btn').click(function() {
+                var eventId = $(this).data('id');
+                var eventTitle = $(this).data('title');
+
+                $('#deleteEventId').val(eventId);
+                $('#deleteEventTitle').text(eventTitle);
+                $('#deleteModal').modal('show');
+            });
+
+            // Toggle status button click
+            $('.toggle-status-btn').click(function() {
+                var eventId = $(this).data('id');
+                var currentStatus = $(this).data('status');
+                var button = $(this);
+
+                var newStatus = currentStatus === 'upcoming' ? 'cancelled' : 'upcoming';
+                var confirmMessage = newStatus === 'cancelled'
+                    ? 'Are you sure you want to cancel this event?'
+                    : 'Are you sure you want to activate this event?';
+
+                if (confirm(confirmMessage)) {
+                    $.ajax({
+                        url: '@Url.Action("ToggleEventStatus")',
+                        type: 'POST',
+                        data: {
+                            id: eventId,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                alert('Failed to update event status.');
+                            }
+                        },
+                        error: function() {
+                            alert('An error occurred.');
+                        }
+                    });
+                }
+            });
+
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}

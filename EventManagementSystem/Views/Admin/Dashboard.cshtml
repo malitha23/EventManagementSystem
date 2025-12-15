@@ -1,2 +1,524 @@
-﻿<h1>Admin Dashboard</h1>
-<p>Welcome Admin!</p>
+﻿@model EventManagementSystem.Models.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Admin Dashboard</h1>
+        <div>
+            <a href="/Admin/Users" class="btn btn-info">
+                <i class="fas fa-users me-2"></i>Manage Users
+            </a>
+            <a href="/Admin/Events" class="btn btn-primary">
+                <i class="fas fa-calendar-alt me-2"></i>All Events
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Total Revenue Card -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-primary shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                Total Revenue
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                LKR @Model.Stats.TotalRevenue.ToString("N2")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            Overall Income
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Users Card -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-info shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                Total Users
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @Model.Stats.TotalUsers
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            All Registered Users
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Organizers Card -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-warning shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                Total Organizers
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @Model.Stats.TotalOrganizers
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-tie fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            Event Organizers
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Bookings Card -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-success shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                Total Bookings
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @Model.Stats.TotalBookings
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-ticket-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            All Time Bookings
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Events Card -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-danger shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-danger text-uppercase mb-1">
+                                Active Events
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                @Model.Stats.ActiveEvents
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            Currently Active
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Average Booking Value -->
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card border-start-secondary shadow h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs fw-bold text-secondary text-uppercase mb-1">
+                                Avg Booking Value
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                LKR @Model.Stats.AverageBookingValue.ToString("N2")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-pie fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            Per Booking Average
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Data Grids -->
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-xl-8">
+            <!-- Revenue Chart -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fw-bold text-primary">Platform Revenue</h6>
+                    <select id="chartPeriod" class="form-select form-select-sm w-auto">
+                        <option value="6" selected>Last 6 Months</option>
+                        <option value="3">Last 3 Months</option>
+                        <option value="12">Last Year</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="revenueChart"
+                                data-months='@Json.Serialize(Model.MonthlyRevenues?.Select(m => m.Month) ?? new List<string>())'
+                                data-revenues='@Json.Serialize(Model.MonthlyRevenues?.Select(m => m.Revenue) ?? new List<decimal>())'>
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User & Organizer Statistics -->
+            <div class="row g-4 mb-4">
+                <!-- User Growth -->
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 fw-bold text-primary">User Growth</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <div class="text-muted small">Total Users</div>
+                                    <div class="h4 fw-bold">@Model.Stats.TotalUsers</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="text-muted small">This Month</div>
+                                    <div class="h5 fw-bold text-success">+@Model.Stats.NewUsersThisMonth</div>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-info"
+                                     role="progressbar"
+                                     style="width: @(Model.Stats.UserGrowthPercentage)%">
+                                </div>
+                            </div>
+                            <div class="mt-2 text-muted small">
+                                @Model.Stats.UserGrowthPercentage% growth this month
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Organizer Statistics -->
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 fw-bold text-primary">Organizer Statistics</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <div class="text-muted small">Total Organizers</div>
+                                    <div class="h4 fw-bold">@Model.Stats.TotalOrganizers</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="text-muted small">Active</div>
+                                    <div class="h5 fw-bold text-success">@Model.Stats.ActiveOrganizers</div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between text-center">
+                                <div>
+                                    <div class="h6 fw-bold">@Model.Stats.OrganizersWithEvents</div>
+                                    <div class="text-muted small">With Events</div>
+                                </div>
+                                <div>
+                                    <div class="h6 fw-bold text-success">LKR @Model.Stats.TopOrganizerRevenue.ToString("N0")</div>
+                                    <div class="text-muted small">Top Organizer</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Performing Organizers -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Top Performing Organizers</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Organizer</th>
+                                    <th>Events</th>
+                                    <th>Total Bookings</th>
+                                    <th>Total Revenue</th>
+                                    @* <th>Action</th> *@
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var organizer in Model.TopOrganizers)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                    <i class="fas fa-user-tie text-primary"></i>
+                                                </div>
+                                                <div>
+                                                    <strong>@organizer.Name</strong>
+                                                    <div class="text-muted small">@organizer.Email</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@organizer.TotalEvents</td>
+                                        <td>@organizer.TotalBookings</td>
+                                        <td class="text-success fw-bold">
+                                            LKR @organizer.TotalRevenue.ToString("N2")
+                                        </td>
+                                        @* <td> *@
+                                        @*     <a href="/Admin/OrganizerDetails/@organizer.Id" *@
+                                        @*        class="btn btn-sm btn-outline-primary"> *@
+                                        @*         View Details *@
+                                        @*     </a> *@
+                                        @* </td> *@
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-xl-4">
+            <!-- Booking Statistics -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Booking Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Confirmed</span>
+                            <span class="fw-bold">@Model.Stats.ConfirmedBookings</span>
+                        </div>
+                        <div class="progress mb-3" style="height: 8px;">
+                            <div class="progress-bar bg-success"
+                                 style="width: @(Model.Stats.BookingConfirmationRate)%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Pending</span>
+                            <span class="fw-bold">@Model.Stats.PendingBookings</span>
+                        </div>
+                        <div class="progress mb-3" style="height: 8px;">
+                            <div class="progress-bar bg-warning"
+                                 style="width: @(Model.Stats.PendingBookings * 100 / Math.Max(Model.Stats.TotalBookings, 1))%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Cancelled</span>
+                            <span class="fw-bold">@Model.Stats.CancelledBookings</span>
+                        </div>
+                        <div class="progress mb-3" style="height: 8px;">
+                            <div class="progress-bar bg-danger"
+                                 style="width: @(Model.Stats.CancelledBookings * 100 / Math.Max(Model.Stats.TotalBookings, 1))%"></div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <div class="h5 fw-bold text-primary">
+                            @Model.Stats.BookingConfirmationRate.ToString("0.00")%
+                            Confirmation Rate
+                        </div>
+                        <small class="text-muted">Overall booking success rate</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent High-Value Bookings -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fw-bold text-primary">Recent High-Value Bookings</h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        @foreach (var booking in Model.RecentBookings.Where(b => b.FinalAmount > 10000).Take(5))
+                        {
+                            <div class="list-group-item px-0">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1">@booking.CustomerName</h6>
+                                        <small class="text-muted">@booking.EventTitle</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold text-success">LKR @booking.FinalAmount.ToString("N0")</div>
+                                        <small class="badge bg-info">@booking.NumberOfTickets tickets</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        @booking.CreatedAt.ToString("MMM dd, HH:mm")
+                                    </small>
+                                    <span class="@(booking.PaymentStatus == "paid" ? "badge bg-success" : "badge bg-warning")">
+                                        @booking.PaymentStatus.ToUpper()
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/Admin/Users" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-user-cog me-2"></i>Manage Users
+                        </a>
+                        <a href="/Admin/Venues" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-user-tie me-2"></i>Manage Venues
+                        </a>
+                        <a href="/Admin/Reports" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-chart-bar me-2"></i>Generate Reports
+                        </a>
+                        <a href="/Admin/EventCategories" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-tags me-2"></i>Manage Categories
+                        </a>
+                        <a href="/Admin/Promotions" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-tags me-2"></i>Manage Promotions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Revenue Chart
+            const revenueChart = document.getElementById('revenueChart');
+            if (revenueChart) {
+                const months = JSON.parse(revenueChart.dataset.months);
+                const revenues = JSON.parse(revenueChart.dataset.revenues);
+
+                const ctx = revenueChart.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Revenue (LKR)',
+                            data: revenues,
+                            borderColor: '#4e73df',
+                            backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'LKR ' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Revenue: LKR ' + context.parsed.y.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Period selector functionality
+            const periodSelector = document.getElementById('chartPeriod');
+            if (periodSelector) {
+                periodSelector.addEventListener('change', function() {
+                    const months = this.value;
+                    // You can implement AJAX call here to update chart data
+                    console.log('Period changed to:', months + ' months');
+                });
+            }
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .avatar-sm {
+            width: 32px;
+            height: 32px;
+        }
+
+        .progress {
+            border-radius: 4px;
+        }
+
+        .card {
+            border-radius: 10px;
+        }
+
+        .list-group-item {
+            border: none;
+            padding: 1rem 0;
+        }
+
+        .badge {
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+        }
+    </style>
+}

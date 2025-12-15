@@ -1,4 +1,4 @@
-﻿namespace EventManagementSystem.Models
+﻿namespace EventManagementSystem.Models.ViewModels
 {
     public class ErrorViewModel
     {
